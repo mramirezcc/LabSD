@@ -10,10 +10,12 @@ Este repositorio contiene la implementación de la Guía de Laboratorio Nro. 01 
 * **Docente:** Mg. Maribel Molina Barriga
 
 ## 👥 Integrantes - Grupo 3
-* Larico Rodriguez, [Nombre]
-* Maldonado Vilca, [Nombre]
-* Quispe Huaman, [Nombre]
-* Salas Aguilar, [Nombre]
+* Mamani Anahua Victor Narciso
+* Maldonado Vilca Victor Gonzalo
+* Larico Rodriguez Bryan Larico
+* Quispe Madariaga Jeferson Jofre
+* Ramirez Ccahuana, Max Edu
+
 
 ---
 
