@@ -1,40 +1,30 @@
-----------------------------------------------------
-Tiempo de envío del Cliente: 30/04/2026 19:04:00.165
-Tiempo de recepción en el Servidor: 30/04/2026 19:04:00.169
-Tiempo de envío del Servidor: 30/04/2026 19:04:01.670
-Tiempo de recepción en el Cliente: 30/04/2026 19:04:02.172
-
-Tiempo marcado en el servidor: 30/04/2026 19:04:00.170
-Tiempo Algoritmo de Cristian: 30/04/2026 19:04:01.422
-----------------------------------------------------
-Tiempo de envío del Cliente: 30/04/2026 19:04:06.137
-Tiempo de recepción en el Servidor: 30/04/2026 19:04:06.138
-Tiempo de envío del Servidor: 30/04/2026 19:04:07.638
-Tiempo de recepción en el Cliente: 30/04/2026 19:04:08.139
-
-Tiempo marcado en el servidor: 30/04/2026 19:04:06.138
-Tiempo Algoritmo de Cristian: 30/04/2026 19:04:07.389
-----------------------------------------------------
-Tiempo de envío del Cliente: 30/04/2026 19:04:12.138
-Tiempo de recepción en el Servidor: 30/04/2026 19:04:12.139
-Tiempo de envío del Servidor: 30/04/2026 19:04:13.639
-Tiempo de recepción en el Cliente: 30/04/2026 19:04:14.139
-
-Tiempo marcado en el servidor: 30/04/2026 19:04:12.139
-Tiempo Algoritmo de Cristian: 30/04/2026 19:04:13.389
-----------------------------------------------------
-Tiempo de envío del Cliente: 30/04/2026 19:04:18.139
-Tiempo de recepción en el Servidor: 30/04/2026 19:04:18.140
-Tiempo de envío del Servidor: 30/04/2026 19:04:19.640
-Tiempo de recepción en el Cliente: 30/04/2026 19:04:20.140
-
-Tiempo marcado en el servidor: 30/04/2026 19:04:18.140
-Tiempo Algoritmo de Cristian: 30/04/2026 19:04:19.390
-----------------------------------------------------
-Tiempo de envío del Cliente: 30/04/2026 19:04:24.138
-Tiempo de recepción en el Servidor: 30/04/2026 19:04:24.139
-Tiempo de envío del Servidor: 30/04/2026 19:04:25.639
-Tiempo de recepción en el Cliente: 30/04/2026 19:04:26.139
-
-Tiempo marcado en el servidor: 30/04/2026 19:04:24.139
-Tiempo Algoritmo de Cristian: 30/04/2026 19:04:25.389
+--- Log de sincronización (Cristian) ---
+Precisión deseada ±D (ms): 400 ms
+UMBRAL_RTT_MAX (2·D): 800 ms
+Objetivo sincronizaciones: 3
+----------------------------------------
+Intento fallido: RTT muy alto (937 ms)
+--- Sincronización Exitosa ---
+T0 (Envío Cliente): 		07/05/2026 22:58:21.959
+T_servidor (Hora Servidor): 	07/05/2026 23:03:22.084
+T1 (Recepción Cliente): 	07/05/2026 22:58:22.086
+RTT de la red: 			127 ms
+Desfase aplicado: 		300061 ms
+T_nuevo (Calculado): 		07/05/2026 23:03:22.147
+------------------------------
+--- Sincronización Exitosa ---
+T0 (Envío Cliente): 		07/05/2026 23:03:26.017
+T_servidor (Hora Servidor): 	07/05/2026 23:03:26.544
+T1 (Recepción Cliente): 	07/05/2026 23:03:26.607
+RTT de la red: 			590 ms
+Desfase aplicado: 		232 ms
+T_nuevo (Calculado): 		07/05/2026 23:03:26.839
+------------------------------
+--- Sincronización Exitosa ---
+T0 (Envío Cliente): 		07/05/2026 23:03:30.249
+T_servidor (Hora Servidor): 	07/05/2026 23:03:30.121
+T1 (Recepción Cliente): 	07/05/2026 23:03:30.415
+RTT de la red: 			166 ms
+Desfase aplicado: 		-211 ms
+T_nuevo (Calculado): 		07/05/2026 23:03:30.204
+------------------------------

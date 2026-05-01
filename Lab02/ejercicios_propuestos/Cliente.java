@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ClienteV2 {
+public class Cliente {
   private String nomeServidor;
   private int portaServidor;
   private static int conexionesExitosas;
@@ -21,17 +21,17 @@ public class ClienteV2 {
   private long UMBRAL_RTT_MAX;
   private int objetivoSincronizaciones;
 
-  public ClienteV2(String nomeServidor, int portaServidor, long precisionD, long desfaseRelojLocal, int objetivoSincronizaciones) {
+  public Cliente(String nomeServidor, int portaServidor, long precisionD, long desfaseRelojLocal, int objetivoSincronizaciones) {
     this.nomeServidor = nomeServidor;
     this.portaServidor = portaServidor;
-    ClienteV2.conexionesExitosas = 0;
+    Cliente.conexionesExitosas = 0;
     this.temporizador = new Timer();
     this.precisionD = precisionD;
     this.UMBRAL_RTT_MAX = 2 * precisionD;
     this.desfaseRelojLocal = desfaseRelojLocal;
     this.objetivoSincronizaciones = objetivoSincronizaciones;
     try {
-      this.pr = new PrintWriter("LogClientesV2.txt", "UTF-8");
+      this.pr = new PrintWriter("LogClientes.txt", "UTF-8");
       pr.println("--- Log de sincronización (Cristian) ---");
       pr.println("Precisión deseada ±D (ms): " + precisionD + " ms");
       pr.println("UMBRAL_RTT_MAX (2·D): " + this.UMBRAL_RTT_MAX + " ms");
@@ -138,7 +138,7 @@ public class ClienteV2 {
     if (args.length >= 5) try { objetivo = Integer.parseInt(args[4]); } catch (NumberFormatException ignored) {}
 
     System.out.println("Iniciando ClienteV2 con: host=" + host + " port=" + port + " D=" + D + "ms desfase=" + desfase + "ms objetivo=" + objetivo);
-    ClienteV2 cliente = new ClienteV2(host, port, D, desfase, objetivo);
+    Cliente cliente = new Cliente(host, port, D, desfase, objetivo);
     // Intentará conectarse cada 4 segundos.
     cliente.temporizador.schedule(cliente.new Conversation(), 0, 4000);
   }

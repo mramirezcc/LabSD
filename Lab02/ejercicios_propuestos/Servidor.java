@@ -6,12 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class ServidorV2 extends Thread {
+public class Servidor extends Thread {
   private final ServerSocket servidorSocket;
   private final long minLatencyMs;
   private final long maxLatencyMs;
 
-  public ServidorV2(int port, long minLatencyMs, long maxLatencyMs) throws IOException {
+  public Servidor(int port, long minLatencyMs, long maxLatencyMs) throws IOException {
     servidorSocket = new ServerSocket(port);
     this.minLatencyMs = Math.max(0, Math.min(minLatencyMs, maxLatencyMs));
     this.maxLatencyMs = Math.max(this.minLatencyMs, maxLatencyMs);
@@ -65,7 +65,7 @@ public class ServidorV2 extends Thread {
     if (args.length >= 3) try { maxLat = Long.parseLong(args[2]); } catch (NumberFormatException ignored) {}
 
     try {
-      Thread t = new ServidorV2(port, minLat, maxLat);
+      Thread t = new Servidor(port, minLat, maxLat);
       t.start();
     } catch (IOException e) {
       e.printStackTrace();
