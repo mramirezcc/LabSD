@@ -8,6 +8,10 @@ import java.rmi.registry.Registry;
 public class UnifiedServer {
     public static void main(String[] args) {
         try {
+            // Configurar RMI para escuchar en todas las interfaces de red
+            String serverIP = "10.7.120.95"; // IP del servidor en la red local
+            System.setProperty("java.rmi.server.hostname", serverIP);
+            
             // Creamos el registro en el puerto 1099 UNA SOLA VEZ
             Registry registry = LocateRegistry.createRegistry(1099);
             

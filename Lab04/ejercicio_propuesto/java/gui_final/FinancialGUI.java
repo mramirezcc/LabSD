@@ -2,15 +2,14 @@ package gui_final;
 
 import ejercicio_2.CreditCardInterface;
 import ejercicio_3.CurrencyConverterInterface;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -44,7 +43,9 @@ public class FinancialGUI extends JFrame {
 
     private void conectarRMI() {
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            // Conectar al servidor RMI en la red local
+            String serverIP = "10.7.120.68"; // IP del servidor en la red local
+            Registry registry = LocateRegistry.getRegistry(serverIP, 1099);
             // Intentamos conectar a ambos servicios
             try {
                 atmService = (CreditCardInterface) registry.lookup("ServicioTarjetas");

@@ -1,4 +1,4 @@
-package ejercicio_2;
+1package ejercicio_2;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
