@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+// Esta opción le indica a gRPC que use exactamente el mismo paquete de tu laboratorio
+option java_package = "Lab05.ejercicios_propuestos.ejercicio02.java";
+option java_multiple_files = true;
+
+service Converter {
+  rpc Convert (ConvertRequest) returns (ConvertResponse);
+}
+
+message ConvertRequest {
+  double value = 1;
+  string conversionType = 2; // Valores soportados: "C_TO_F", "PEN_TO_USD", "KM_TO_MI"
+}
+
+message ConvertResponse {
+  double result = 1;
+  string message = 2; 
+}

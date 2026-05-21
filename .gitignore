@@ -1,2 +1,24 @@
 *.class
 __pycache__/
+# === MAVEN (Archivos temporales de compilación) ===
+target/
+*.jar
+*.war
+*.ear
+
+# === VS CODE (Configuraciones locales del editor) ===
+.settings/
+.project
+.classpath
+.factorypath
+.vscode/
+*.code-workspace
+
+# === SISTEMA OPERATIVO ===
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# === ARCHIVOS DE RESPALDO O LOGS ===
+*.log
+*.tmp
