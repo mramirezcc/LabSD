@@ -459,6 +459,8 @@ public class ClientGUI extends JFrame {
         try {
             double b = Double.parseDouble(getDisplay());
             double r;
+            // 1. Iniciar el temporizador justo antes de la llamada de red
+            long tiempoInicio = System.nanoTime();
             switch (selectedOperation) {
                 case "add":      r = calculator.add(firstNumber, b);      break;
                 case "subtract": r = calculator.subtract(firstNumber, b); break;
@@ -467,6 +469,22 @@ public class ClientGUI extends JFrame {
                 case "power":    r = calculator.power(firstNumber, b);    break;
                 default: return;
             }
+            // 2. Detener el temporizador inmediatamente después de recibir la respuesta
+            long tiempoFin = System.nanoTime();
+            
+            // 3. Convertir la diferencia de nanosegundos a milisegundos
+            double tiempoTotalMs = (tiempoFin - tiempoInicio) / 1_000_000.0;
+            
+            // 4. Imprimir la telemetría en la consola de VS Code
+            System.out.println("\n[TELEMETRÍA RMI — EJERCICIO 01]");
+            System.out.printf("Operación ejecutada: %s (%f, %f)\n", selectedOperation, firstNumber, b);
+            System.out.printf(">>>> Tiempo de respuesta del servidor: %.3f ms\n", tiempoTotalMs);
+            // Código para estimar la memoria en uso por la JVM
+            Runtime runtime = Runtime.getRuntime();
+            long memoriaUsada = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+            System.out.printf(">>>> Memoria estimada en uso: %d MB\n", memoriaUsada);
+            System.out.println("────────────────────────────────────────────────────────");
+            
             lblHistory.setText(" ");
             setDisplay(r % 1 == 0 ? String.valueOf((long) r) : String.valueOf(r));
             selectedOperation = "";

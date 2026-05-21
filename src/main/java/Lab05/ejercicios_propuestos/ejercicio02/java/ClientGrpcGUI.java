@@ -114,7 +114,26 @@ public class ClientGrpcGUI extends JFrame {
             double val = Double.parseDouble(input.getText().trim());
             ConvertRequest req = ConvertRequest.newBuilder()
                     .setValue(val).setConversionType(opCode).build();
+            
+            // 1. Iniciar temporizador gRPC (Antes de la serialización binaria y envío HTTP/2)
+            long tiempoInicio = System.nanoTime();
             ConvertResponse resp = stubBloqueante.convert(req);
+
+            // 2. Detener el temporizador inmediatamente después de recibir la respuesta
+            long tiempoFin = System.nanoTime();
+
+            // 3. Convertir la diferencia de nanosegundos a milisegundos
+            double tiempoTotalMs = (tiempoFin - tiempoInicio) / 1_000_000.0;
+        
+            // 4. Imprimir la telemetría en la consola de VS Code
+            System.out.println("\n[TELEMETRÍA gRPC — EJERCICIO 02]");
+            System.out.printf("Operación ejecutada: %s (%f, %f)\n", opCode, val, resp.getResult());
+            System.out.printf(">>>> Tiempo de respuesta del servidor: %.3f ms\n", tiempoTotalMs);
+            // Código para estimar la memoria en uso por la JVM
+            Runtime runtime = Runtime.getRuntime();
+            long memoriaUsada = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+            System.out.printf(">>>> Memoria estimada en uso: %d MB\n", memoriaUsada);
+            System.out.println("────────────────────────────────────────────────────────");
 
             if (resp.getMessage().startsWith("Error")) {
                 result.setText("—");
