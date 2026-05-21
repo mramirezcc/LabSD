@@ -98,6 +98,12 @@ Desarrollo de aplicaciones distribuidas en Python.
 
 ---
 
+## 📌 Lab04
+
+En Desarrollo ...
+
+---
+
 # 🧠 Tecnologías Utilizadas
 
 | Tecnología | Uso |

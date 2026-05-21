@@ -1,6 +1,5 @@
 package Lab03.ejercicio_propuesto.java;
 
-
 import java.io.*;
 
 /*
