@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.example.calculator";
+option java_outer_classname = "CalculatorProto";
+
+service Calculator {
+  rpc Sum (Request) returns (Response);
+}
+
+message Request {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message Response {
+  int32 result = 1;
+}

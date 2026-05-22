@@ -1,0 +1,26 @@
+package com.example.calculator;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+
+public class CalculatorClient {
+
+  public static void main(String[] args) {
+    ManagedChannel channel = ManagedChannelBuilder
+        .forAddress("localhost", 50051)
+        .usePlaintext()
+        .build();
+
+    CalculatorGrpc.CalculatorBlockingStub stub = CalculatorGrpc.newBlockingStub(channel);
+
+    CalculatorProto.Request request = CalculatorProto.Request.newBuilder()
+        .setA(8)
+        .setB(4)
+        .build();
+
+    CalculatorProto.Response response = stub.sum(request);
+    System.out.println("Resultado: " + response.getResult());
+
+    channel.shutdown();
+  }
+}
