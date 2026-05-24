@@ -4,162 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 Biblioteca API - Cliente Web</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
-
-        header {
-            background: linear-gradient(135deg, #1e3a5f, #0ea5e9);
-            padding: 24px 32px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        header { background: linear-gradient(135deg, #1e3a5f, #0ea5e9); padding: 24px 32px; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
         header h1 { font-size: 1.8rem; font-weight: 700; }
         header p  { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; }
-
         .container { max-width: 1100px; margin: 0 auto; padding: 32px 16px; }
-
-        /* TABS */
-        .tabs {
-            display: flex; gap: 8px; flex-wrap: wrap;
-            border-bottom: 2px solid #1e293b;
-            margin-bottom: 28px;
-        }
-        .tab {
-            padding: 10px 20px; cursor: pointer;
-            border-radius: 8px 8px 0 0;
-            background: #1e293b; color: #94a3b8;
-            border: none; font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-        .tab:hover   { background: #334155; color: #e2e8f0; }
-        .tab.activo  { background: #0ea5e9; color: white; }
-
-        /* PANEL */
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #1e293b; margin-bottom: 28px; }
+        .tab { padding: 10px 20px; cursor: pointer; border-radius: 8px 8px 0 0; background: #1e293b; color: #94a3b8; border: none; font-size: 0.9rem; transition: all 0.2s; }
+        .tab:hover { background: #334155; color: #e2e8f0; }
+        .tab.activo { background: #0ea5e9; color: white; }
         .panel { display: none; }
         .panel.activo { display: block; }
-
-        /* CARDS */
-        .card {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid #334155;
-        }
-        .card h3 {
-            font-size: 1rem;
-            color: #0ea5e9;
-            margin-bottom: 16px;
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        /* FORM */
+        .card { background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #334155; }
+        .card h3 { font-size: 1rem; color: #0ea5e9; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group.full { grid-column: 1 / -1; }
         label { font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
-
-        input, select {
-            background: #0f172a; border: 1px solid #334155;
-            color: #e2e8f0; padding: 10px 14px;
-            border-radius: 8px; font-size: 0.95rem;
-            transition: border-color 0.2s;
-        }
-        input:focus, select:focus {
-            outline: none; border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
-        }
-
-        /* BUTTONS */
-        .btn {
-            padding: 10px 22px; border: none; border-radius: 8px;
-            cursor: pointer; font-size: 0.9rem; font-weight: 600;
-            transition: all 0.2s; display: inline-flex;
-            align-items: center; gap: 8px;
-        }
+        input, select { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; transition: border-color 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+        .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: #0ea5e9; color: white; }
         .btn-primary:hover { background: #0284c7; }
         .btn-success { background: #10b981; color: white; }
         .btn-success:hover { background: #059669; }
-        .btn-danger  { background: #ef4444; color: white; }
-        .btn-danger:hover  { background: #dc2626; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
         .btn-warning { background: #f59e0b; color: white; }
         .btn-warning:hover { background: #d97706; }
         .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #334155; }
         .btn-outline:hover { border-color: #0ea5e9; color: #0ea5e9; }
-
-        /* SEARCH BAR */
-        .search-bar {
-            display: flex; gap: 10px; margin-bottom: 20px;
-        }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
         .search-bar input { flex: 1; }
-
-        /* TABLA */
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        thead th {
-            background: #0f172a; color: #94a3b8;
-            padding: 12px 14px; text-align: left;
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
-        }
+        thead th { background: #0f172a; color: #94a3b8; padding: 12px 14px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
         tbody tr { border-bottom: 1px solid #1e293b; transition: background 0.15s; }
         tbody tr:hover { background: #1e293b; }
         tbody td { padding: 12px 14px; }
-
-        /* BADGE de estado */
-        .badge {
-            padding: 3px 10px; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-        }
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .badge-disponible { background: #064e3b; color: #6ee7b7; }
-        .badge-prestado   { background: #1c1917; color: #fbbf24; }
-        .badge-agotado    { background: #450a0a; color: #fca5a5; }
-        .badge-baja       { background: #1e293b; color: #64748b; }
-
-        /* RESPONSE BOX */
-        .response-box {
-            background: #0f172a; border: 1px solid #334155;
-            border-radius: 10px; padding: 16px;
-            font-family: 'Courier New', monospace; font-size: 0.82rem;
-            color: #86efac; max-height: 320px; overflow-y: auto;
-            white-space: pre-wrap; margin-top: 16px;
-        }
-
-        /* ESTADÍSTICAS */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
-        .stat-card {
-            background: #0f172a; border-radius: 10px;
-            padding: 18px; text-align: center;
-            border: 1px solid #334155;
-        }
-        .stat-card .numero { font-size: 2.2rem; font-weight: 700; color: #0ea5e9; }
-        .stat-card .label  { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
-
-        .acciones { display: flex; gap: 8px; }
-
-        /* Alerta */
-        .alerta {
-            padding: 12px 16px; border-radius: 8px;
-            margin-bottom: 16px; font-size: 0.88rem; display: none;
-        }
+        .badge-prestado { background: #1c1917; color: #fbbf24; }
+        .badge-agotado { background: #450a0a; color: #fca5a5; }
+        .badge-baja { background: #1e293b; color: #64748b; }
+        .response-box { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: #86efac; max-height: 320px; overflow-y: auto; white-space: pre-wrap; margin-top: 16px; }
+        .alerta { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; display: none; }
         .alerta-ok    { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
         .alerta-error { background: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
         .alerta.visible { display: block; }
+
+        /* ── ESTADÍSTICAS ── */
+        .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .metric-card { background: #0f172a; border-radius: 10px; padding: 18px 12px; text-align: center; border: 1px solid #334155; }
+        .metric-card .numero { font-size: 2.2rem; font-weight: 700; }
+        .metric-card .label  { font-size: 0.78rem; color: #64748b; margin-top: 4px; }
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .chart-box { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+        .chart-box-full { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .chart-label { font-size: 0.78rem; color: #64748b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 0.75rem; color: #94a3b8; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; }
             .tabs { gap: 4px; }
             .tab { padding: 8px 12px; font-size: 0.8rem; }
+            .charts-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -174,7 +88,6 @@
 
 <div class="container">
 
-    <!-- TABS DE NAVEGACIÓN -->
     <div class="tabs">
         <button class="tab activo" onclick="mostrarPanel('listar')">📋 Listar</button>
         <button class="tab" onclick="mostrarPanel('registrar')">➕ Registrar</button>
@@ -184,71 +97,37 @@
         <button class="tab" onclick="mostrarPanel('estadisticas')">📊 Estadísticas</button>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: LISTAR                  -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: LISTAR -->
     <div id="panel-listar" class="panel activo">
         <div class="card">
             <h3>📋 Todos los Libros</h3>
             <div id="alerta-listar" class="alerta"></div>
             <button class="btn btn-primary" onclick="listarLibros()">🔄 Cargar Libros</button>
             <div class="table-wrapper" style="margin-top:16px">
-                <table id="tabla-libros">
-                    <thead>
-                        <tr>
-                            <th>ID</th><th>Título</th><th>Autor</th>
-                            <th>ISBN</th><th>Género</th><th>Stock</th>
-                            <th>Precio</th><th>Estado</th>
-                        </tr>
-                    </thead>
+                <table>
+                    <thead><tr><th>ID</th><th>Título</th><th>Autor</th><th>ISBN</th><th>Género</th><th>Stock</th><th>Precio</th><th>Estado</th></tr></thead>
                     <tbody id="tbody-libros">
-                        <tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px">
-                            Haz clic en "Cargar Libros" para ver los datos
-                        </td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px">Haz clic en "Cargar Libros"</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: REGISTRAR               -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: REGISTRAR -->
     <div id="panel-registrar" class="panel">
         <div class="card">
             <h3>➕ Registrar Nuevo Libro</h3>
             <div id="alerta-registrar" class="alerta"></div>
             <div class="form-grid">
-                <div class="form-group full">
-                    <label>Título *</label>
-                    <input id="r-titulo" placeholder="Ej: Clean Code" />
-                </div>
-                <div class="form-group">
-                    <label>Autor *</label>
-                    <input id="r-autor" placeholder="Ej: Robert C. Martin" />
-                </div>
-                <div class="form-group">
-                    <label>ISBN *</label>
-                    <input id="r-isbn" placeholder="Ej: 978-0132350884" />
-                </div>
-                <div class="form-group">
-                    <label>Género *</label>
-                    <input id="r-genero" placeholder="Ej: Programación" />
-                </div>
-                <div class="form-group">
-                    <label>Año Publicación</label>
-                    <input id="r-anio" type="number" placeholder="Ej: 2008" min="1" max="2030" />
-                </div>
-                <div class="form-group">
-                    <label>Stock</label>
-                    <input id="r-stock" type="number" placeholder="Ej: 5" min="0" value="1" />
-                </div>
-                <div class="form-group">
-                    <label>Precio (S/.)</label>
-                    <input id="r-precio" type="number" placeholder="Ej: 49.99" min="0" step="0.01" />
-                </div>
-                <div class="form-group">
-                    <label>Estado</label>
+                <div class="form-group full"><label>Título *</label><input id="r-titulo" placeholder="Ej: Clean Code" /></div>
+                <div class="form-group"><label>Autor *</label><input id="r-autor" placeholder="Ej: Robert C. Martin" /></div>
+                <div class="form-group"><label>ISBN *</label><input id="r-isbn" placeholder="Ej: 978-0132350884" /></div>
+                <div class="form-group"><label>Género *</label><input id="r-genero" placeholder="Ej: Programación" /></div>
+                <div class="form-group"><label>Año Publicación</label><input id="r-anio" type="number" placeholder="Ej: 2008" min="1" max="2030" /></div>
+                <div class="form-group"><label>Stock</label><input id="r-stock" type="number" placeholder="Ej: 5" min="0" value="1" /></div>
+                <div class="form-group"><label>Precio (S/.)</label><input id="r-precio" type="number" placeholder="Ej: 49.99" min="0" step="0.01" /></div>
+                <div class="form-group"><label>Estado</label>
                     <select id="r-estado">
                         <option value="DISPONIBLE">✅ Disponible</option>
                         <option value="PRESTADO">🔖 Prestado</option>
@@ -264,15 +143,11 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: BUSCAR                  -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: BUSCAR -->
     <div id="panel-buscar" class="panel">
         <div class="card">
             <h3>🔍 Buscar Libros</h3>
-
             <div style="display:flex;flex-direction:column;gap:20px">
-                <!-- Buscar por ID -->
                 <div>
                     <label style="font-size:0.8rem;color:#94a3b8;font-weight:600;text-transform:uppercase">Por ID</label>
                     <div class="search-bar" style="margin-top:8px">
@@ -280,8 +155,6 @@
                         <button class="btn btn-primary" onclick="buscarPorId()">Buscar</button>
                     </div>
                 </div>
-
-                <!-- Buscar por término -->
                 <div>
                     <label style="font-size:0.8rem;color:#94a3b8;font-weight:600;text-transform:uppercase">Por Título o Autor</label>
                     <div class="search-bar" style="margin-top:8px">
@@ -289,8 +162,6 @@
                         <button class="btn btn-primary" onclick="buscarPorTermino()">Buscar</button>
                     </div>
                 </div>
-
-                <!-- Buscar por género -->
                 <div>
                     <label style="font-size:0.8rem;color:#94a3b8;font-weight:600;text-transform:uppercase">Por Género</label>
                     <div class="search-bar" style="margin-top:8px">
@@ -298,8 +169,6 @@
                         <button class="btn btn-primary" onclick="buscarPorGenero()">Buscar</button>
                     </div>
                 </div>
-
-                <!-- Buscar por estado -->
                 <div>
                     <label style="font-size:0.8rem;color:#94a3b8;font-weight:600;text-transform:uppercase">Por Estado</label>
                     <div class="search-bar" style="margin-top:8px">
@@ -313,19 +182,15 @@
                     </div>
                 </div>
             </div>
-
             <div id="resp-buscar" class="response-box" style="display:none"></div>
         </div>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: ACTUALIZAR              -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: ACTUALIZAR -->
     <div id="panel-actualizar" class="panel">
         <div class="card">
             <h3>✏️ Actualizar Libro</h3>
             <div id="alerta-actualizar" class="alerta"></div>
-
             <div style="margin-bottom:20px">
                 <label style="font-size:0.8rem;color:#94a3b8;font-weight:600;text-transform:uppercase">ID del libro a actualizar</label>
                 <div class="search-bar" style="margin-top:8px">
@@ -333,20 +198,15 @@
                     <button class="btn btn-outline" onclick="cargarParaEditar()">📥 Cargar</button>
                 </div>
             </div>
-
             <div class="form-grid">
-                <div class="form-group full">
-                    <label>Título</label>
-                    <input id="a-titulo" placeholder="Título del libro" />
-                </div>
+                <div class="form-group full"><label>Título</label><input id="a-titulo" /></div>
                 <div class="form-group"><label>Autor</label><input id="a-autor" /></div>
                 <div class="form-group"><label>ISBN</label><input id="a-isbn" /></div>
                 <div class="form-group"><label>Género</label><input id="a-genero" /></div>
                 <div class="form-group"><label>Año</label><input id="a-anio" type="number" /></div>
                 <div class="form-group"><label>Stock</label><input id="a-stock" type="number" /></div>
                 <div class="form-group"><label>Precio</label><input id="a-precio" type="number" step="0.01" /></div>
-                <div class="form-group">
-                    <label>Estado</label>
+                <div class="form-group"><label>Estado</label>
                     <select id="a-estado">
                         <option value="DISPONIBLE">Disponible</option>
                         <option value="PRESTADO">Prestado</option>
@@ -355,16 +215,14 @@
                     </select>
                 </div>
             </div>
-            <div style="margin-top:20px;display:flex;gap:12px">
+            <div style="margin-top:20px">
                 <button class="btn btn-warning" onclick="actualizarLibro()">💾 Guardar Cambios</button>
             </div>
             <div id="resp-actualizar" class="response-box" style="display:none"></div>
         </div>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: ELIMINAR                -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: ELIMINAR -->
     <div id="panel-eliminar" class="panel">
         <div class="card">
             <h3>🗑️ Eliminar Libro</h3>
@@ -377,16 +235,55 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════ -->
-    <!-- PANEL: ESTADÍSTICAS            -->
-    <!-- ══════════════════════════════ -->
+    <!-- PANEL: ESTADÍSTICAS CON GRÁFICOS -->
     <div id="panel-estadisticas" class="panel">
         <div class="card">
             <h3>📊 Estadísticas de la Biblioteca</h3>
-            <button class="btn btn-primary" onclick="cargarEstadisticas()">🔄 Actualizar Estadísticas</button>
-            <div id="stats-container" style="margin-top:20px">
-                <div style="text-align:center;color:#64748b;padding:30px">Clic en "Actualizar" para ver las estadísticas</div>
+            <button class="btn btn-primary" onclick="cargarEstadisticas()">🔄 Actualizar</button>
+
+            <!-- Métricas numéricas -->
+            <div id="stats-metricas" style="margin-top:20px">
+                <div style="text-align:center;color:#64748b;padding:20px">Clic en "Actualizar" para ver las estadísticas</div>
             </div>
+
+            <!-- Gráficos -->
+            <div id="stats-graficos" style="display:none">
+
+                <!-- Fila 1: dona + barras horizontales -->
+                <div class="charts-grid">
+                    <div class="chart-box">
+                        <div class="chart-label">Distribución por estado</div>
+                        <div class="legend" id="legend-estado"></div>
+                        <div style="position:relative;width:100%;height:220px">
+                            <canvas id="chartEstado" role="img" aria-label="Distribución de libros por estado"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-label">Libros por género</div>
+                        <div style="position:relative;height:260px">
+                            <canvas id="chartGenero" role="img" aria-label="Cantidad de libros por género"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 2: stock -->
+                <div class="chart-box-full">
+                    <div class="chart-label">Stock por libro</div>
+                    <div style="position:relative;height:220px">
+                        <canvas id="chartStock" role="img" aria-label="Stock disponible por cada libro"></canvas>
+                    </div>
+                </div>
+
+                <!-- Fila 3: precio -->
+                <div class="chart-box-full">
+                    <div class="chart-label">Precio por libro (S/.)</div>
+                    <div style="position:relative;height:200px">
+                        <canvas id="chartPrecio" role="img" aria-label="Precio de cada libro en soles"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
             <div id="resp-stats" class="response-box" style="display:none"></div>
         </div>
     </div>
@@ -394,226 +291,309 @@
 </div>
 
 <script>
-    const BASE_URL = 'http://localhost:8080/api/libros';
+const BASE_URL = 'http://localhost:8080/api/libros';
 
-    // ── NAVEGACIÓN DE TABS ──────────────────────────
-    function mostrarPanel(nombre) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('activo'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
-        document.getElementById('panel-' + nombre).classList.add('activo');
-        event.target.classList.add('activo');
-    }
+// Instancias de los gráficos (para destruir antes de recrear)
+let chartEstadoInst = null, chartGeneroInst = null, chartStockInst = null, chartPrecioInst = null;
 
-    // ── UTILIDADES ──────────────────────────────────
-    function mostrarAlerta(id, tipo, msg) {
-        const el = document.getElementById(id);
-        el.className = `alerta alerta-${tipo} visible`;
-        el.textContent = msg;
-        setTimeout(() => el.classList.remove('visible'), 5000);
-    }
+function mostrarPanel(nombre) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('activo'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+    document.getElementById('panel-' + nombre).classList.add('activo');
+    event.target.classList.add('activo');
+}
 
-    function mostrarJSON(id, data) {
-        const el = document.getElementById(id);
-        el.style.display = 'block';
-        el.textContent = JSON.stringify(data, null, 2);
-    }
+function mostrarAlerta(id, tipo, msg) {
+    const el = document.getElementById(id);
+    el.className = `alerta alerta-${tipo} visible`;
+    el.textContent = msg;
+    setTimeout(() => el.classList.remove('visible'), 5000);
+}
 
-    function badgeEstado(estado) {
-        const clases = {
-            DISPONIBLE: 'badge-disponible', PRESTADO: 'badge-prestado',
-            AGOTADO: 'badge-agotado', BAJA: 'badge-baja'
-        };
-        return `<span class="badge ${clases[estado] || ''}">${estado}</span>`;
-    }
+function mostrarJSON(id, data) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    el.textContent = JSON.stringify(data, null, 2);
+}
 
-    async function fetchAPI(url, opciones = {}) {
-        const res = await fetch(url, {
-            headers: { 'Content-Type': 'application/json' },
-            ...opciones
-        });
-        const data = await res.json();
-        return { ok: res.ok, status: res.status, data };
-    }
+function badgeEstado(estado) {
+    const clases = { DISPONIBLE:'badge-disponible', PRESTADO:'badge-prestado', AGOTADO:'badge-agotado', BAJA:'badge-baja' };
+    return `<span class="badge ${clases[estado]||''}">${estado}</span>`;
+}
 
-    // ── LISTAR ──────────────────────────────────────
-    async function listarLibros() {
-        try {
-            const { ok, data } = await fetchAPI(BASE_URL);
-            if (!ok) return mostrarAlerta('alerta-listar', 'error', data.mensaje);
-            const tbody = document.getElementById('tbody-libros');
-            if (!data.datos || data.datos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px">No hay libros registrados</td></tr>';
-                return;
+async function fetchAPI(url, opciones = {}) {
+    const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opciones });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+}
+
+// ── LISTAR ──────────────────────────────────────
+async function listarLibros() {
+    try {
+        const { ok, data } = await fetchAPI(BASE_URL);
+        if (!ok) return mostrarAlerta('alerta-listar', 'error', data.mensaje);
+        const tbody = document.getElementById('tbody-libros');
+        if (!data.datos || data.datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px">No hay libros registrados</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.datos.map(l => `
+            <tr>
+                <td><strong>${l.id}</strong></td>
+                <td>${l.titulo}</td>
+                <td>${l.autor}</td>
+                <td style="font-family:monospace;font-size:0.8rem">${l.isbn}</td>
+                <td>${l.genero}</td>
+                <td>${l.stock}</td>
+                <td>S/. ${l.precio?.toFixed(2) ?? '-'}</td>
+                <td>${badgeEstado(l.estado)}</td>
+            </tr>`).join('');
+        mostrarAlerta('alerta-listar', 'ok', `✅ ${data.totalRegistros} libros cargados`);
+    } catch(e) { mostrarAlerta('alerta-listar', 'error', '❌ No se pudo conectar con el servidor'); }
+}
+
+// ── REGISTRAR ───────────────────────────────────
+async function registrarLibro() {
+    const body = {
+        titulo: document.getElementById('r-titulo').value,
+        autor: document.getElementById('r-autor').value,
+        isbn: document.getElementById('r-isbn').value,
+        genero: document.getElementById('r-genero').value,
+        anioPublicacion: parseInt(document.getElementById('r-anio').value) || null,
+        stock: parseInt(document.getElementById('r-stock').value) || 0,
+        precio: parseFloat(document.getElementById('r-precio').value) || null,
+        estado: document.getElementById('r-estado').value
+    };
+    try {
+        const { ok, data } = await fetchAPI(BASE_URL, { method: 'POST', body: JSON.stringify(body) });
+        mostrarAlerta('alerta-registrar', ok ? 'ok' : 'error', data.mensaje);
+        mostrarJSON('resp-registrar', data);
+        if (ok) limpiarFormRegistrar();
+    } catch(e) { mostrarAlerta('alerta-registrar', 'error', '❌ Error de conexión'); }
+}
+
+function limpiarFormRegistrar() {
+    ['r-titulo','r-autor','r-isbn','r-genero','r-anio','r-precio'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('r-stock').value = '1';
+    document.getElementById('r-estado').value = 'DISPONIBLE';
+}
+
+// ── BUSCAR ──────────────────────────────────────
+async function buscarPorId() {
+    const id = document.getElementById('b-id').value;
+    if (!id) return;
+    try { const { data } = await fetchAPI(`${BASE_URL}/${id}`); mostrarJSON('resp-buscar', data); }
+    catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
+}
+async function buscarPorTermino() {
+    const q = document.getElementById('b-termino').value;
+    if (!q) return;
+    try { const { data } = await fetchAPI(`${BASE_URL}/buscar?q=${encodeURIComponent(q)}`); mostrarJSON('resp-buscar', data); }
+    catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
+}
+async function buscarPorGenero() {
+    const g = document.getElementById('b-genero').value;
+    if (!g) return;
+    try { const { data } = await fetchAPI(`${BASE_URL}/genero/${encodeURIComponent(g)}`); mostrarJSON('resp-buscar', data); }
+    catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
+}
+async function buscarPorEstado() {
+    const e = document.getElementById('b-estado').value;
+    try { const { data } = await fetchAPI(`${BASE_URL}/estado/${e}`); mostrarJSON('resp-buscar', data); }
+    catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
+}
+
+// ── ACTUALIZAR ──────────────────────────────────
+async function cargarParaEditar() {
+    const id = document.getElementById('a-id').value;
+    if (!id) return mostrarAlerta('alerta-actualizar', 'error', 'Ingresa un ID');
+    try {
+        const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`);
+        if (!ok) return mostrarAlerta('alerta-actualizar', 'error', data.mensaje);
+        const l = data.datos;
+        document.getElementById('a-titulo').value = l.titulo || '';
+        document.getElementById('a-autor').value = l.autor || '';
+        document.getElementById('a-isbn').value = l.isbn || '';
+        document.getElementById('a-genero').value = l.genero || '';
+        document.getElementById('a-anio').value = l.anioPublicacion || '';
+        document.getElementById('a-stock').value = l.stock ?? '';
+        document.getElementById('a-precio').value = l.precio ?? '';
+        document.getElementById('a-estado').value = l.estado || 'DISPONIBLE';
+        mostrarAlerta('alerta-actualizar', 'ok', `✅ Libro "${l.titulo}" cargado`);
+    } catch(e) { mostrarAlerta('alerta-actualizar', 'error', '❌ Error de conexión'); }
+}
+async function actualizarLibro() {
+    const id = document.getElementById('a-id').value;
+    if (!id) return mostrarAlerta('alerta-actualizar', 'error', 'Carga primero un libro');
+    const body = {
+        titulo: document.getElementById('a-titulo').value,
+        autor: document.getElementById('a-autor').value,
+        isbn: document.getElementById('a-isbn').value,
+        genero: document.getElementById('a-genero').value,
+        anioPublicacion: parseInt(document.getElementById('a-anio').value) || null,
+        stock: parseInt(document.getElementById('a-stock').value) || 0,
+        precio: parseFloat(document.getElementById('a-precio').value) || null,
+        estado: document.getElementById('a-estado').value
+    };
+    try {
+        const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+        mostrarAlerta('alerta-actualizar', ok ? 'ok' : 'error', data.mensaje);
+        mostrarJSON('resp-actualizar', data);
+    } catch(e) { mostrarAlerta('alerta-actualizar', 'error', '❌ Error de conexión'); }
+}
+
+// ── ELIMINAR ────────────────────────────────────
+async function eliminarLibro() {
+    const id = document.getElementById('e-id').value;
+    if (!id) return;
+    if (!confirm(`¿Confirmas eliminar el libro ID ${id}?`)) return;
+    try {
+        const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`, { method: 'DELETE' });
+        mostrarAlerta('alerta-eliminar', ok ? 'ok' : 'error', data.mensaje);
+        mostrarJSON('resp-eliminar', data);
+    } catch(e) { mostrarAlerta('alerta-eliminar', 'error', '❌ Error de conexión'); }
+}
+
+// ── ESTADÍSTICAS CON GRÁFICOS ───────────────────
+const COLORES_ESTADO = {
+    DISPONIBLE: '#1d9e75', PRESTADO: '#ba7517', AGOTADO: '#e24b4a', BAJA: '#64748b'
+};
+const PALETTE = ['#378add','#5dcaa5','#ef9f27','#d4537e','#7f77dd','#e24b4a','#63c5da'];
+
+function destruirGraficos() {
+    [chartEstadoInst, chartGeneroInst, chartStockInst, chartPrecioInst].forEach(c => { if (c) c.destroy(); });
+}
+
+async function cargarEstadisticas() {
+    try {
+        // Llamamos también a /api/libros para obtener detalle de libros
+        const [resStats, resLibros] = await Promise.all([
+            fetchAPI(`${BASE_URL}/estadisticas`),
+            fetchAPI(BASE_URL)
+        ]);
+        if (!resStats.ok) return;
+
+        const s = resStats.data.datos;
+        const libros = resLibros.data.datos || [];
+
+        // ── Métricas numéricas ──
+        document.getElementById('stats-metricas').innerHTML = `
+            <div class="metric-row">
+                <div class="metric-card"><div class="numero" style="color:#378add">${s.totalLibros}</div><div class="label">Total Libros</div></div>
+                <div class="metric-card"><div class="numero" style="color:#1d9e75">${s.disponibles}</div><div class="label">Disponibles</div></div>
+                <div class="metric-card"><div class="numero" style="color:#ba7517">${s.prestados}</div><div class="label">Prestados</div></div>
+                <div class="metric-card"><div class="numero" style="color:#e24b4a">${s.agotados}</div><div class="label">Agotados</div></div>
+            </div>`;
+
+        document.getElementById('stats-graficos').style.display = 'block';
+        destruirGraficos();
+
+        // ── Gráfico 1: Dona - estados ──
+        const estadosData = [
+            { label: 'Disponible', valor: s.disponibles, color: '#1d9e75' },
+            { label: 'Prestado',   valor: s.prestados,   color: '#ba7517' },
+            { label: 'Agotado',    valor: s.agotados,    color: '#e24b4a' },
+        ].filter(e => e.valor > 0);
+
+        document.getElementById('legend-estado').innerHTML = estadosData.map(e =>
+            `<span class="legend-item"><span class="legend-dot" style="background:${e.color}"></span>${e.label} (${e.valor})</span>`
+        ).join('');
+
+        chartEstadoInst = new Chart(document.getElementById('chartEstado'), {
+            type: 'doughnut',
+            data: {
+                labels: estadosData.map(e => e.label),
+                datasets: [{ data: estadosData.map(e => e.valor), backgroundColor: estadosData.map(e => e.color), borderWidth: 2, borderColor: '#0f172a', hoverOffset: 8 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '62%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                }
             }
-            tbody.innerHTML = data.datos.map(l => `
-                <tr>
-                    <td><strong>${l.id}</strong></td>
-                    <td>${l.titulo}</td>
-                    <td>${l.autor}</td>
-                    <td style="font-family:monospace;font-size:0.8rem">${l.isbn}</td>
-                    <td>${l.genero}</td>
-                    <td>${l.stock}</td>
-                    <td>S/. ${l.precio?.toFixed(2) ?? '-'}</td>
-                    <td>${badgeEstado(l.estado)}</td>
-                </tr>
-            `).join('');
-            mostrarAlerta('alerta-listar', 'ok', `✅ ${data.totalRegistros} libros cargados`);
-        } catch(e) {
-            mostrarAlerta('alerta-listar', 'error', '❌ No se pudo conectar con el servidor');
-        }
-    }
-
-    // ── REGISTRAR ───────────────────────────────────
-    async function registrarLibro() {
-        const body = {
-            titulo: document.getElementById('r-titulo').value,
-            autor: document.getElementById('r-autor').value,
-            isbn: document.getElementById('r-isbn').value,
-            genero: document.getElementById('r-genero').value,
-            anioPublicacion: parseInt(document.getElementById('r-anio').value) || null,
-            stock: parseInt(document.getElementById('r-stock').value) || 0,
-            precio: parseFloat(document.getElementById('r-precio').value) || null,
-            estado: document.getElementById('r-estado').value
-        };
-        try {
-            const { ok, data } = await fetchAPI(BASE_URL, { method: 'POST', body: JSON.stringify(body) });
-            mostrarAlerta('alerta-registrar', ok ? 'ok' : 'error', data.mensaje);
-            mostrarJSON('resp-registrar', data);
-            if (ok) limpiarFormRegistrar();
-        } catch(e) {
-            mostrarAlerta('alerta-registrar', 'error', '❌ Error de conexión con el servidor');
-        }
-    }
-
-    function limpiarFormRegistrar() {
-        ['r-titulo','r-autor','r-isbn','r-genero','r-anio','r-precio'].forEach(id => {
-            document.getElementById(id).value = '';
         });
-        document.getElementById('r-stock').value = '1';
-        document.getElementById('r-estado').value = 'DISPONIBLE';
-    }
 
-    // ── BUSCAR ──────────────────────────────────────
-    async function buscarPorId() {
-        const id = document.getElementById('b-id').value;
-        if (!id) return;
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`);
-            mostrarJSON('resp-buscar', data);
-        } catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
-    }
+        // ── Gráfico 2: Barras horizontales - géneros ──
+        const generos = Object.entries(s.porGenero || {});
+        chartGeneroInst = new Chart(document.getElementById('chartGenero'), {
+            type: 'bar',
+            data: {
+                labels: generos.map(([g]) => g),
+                datasets: [{ data: generos.map(([,n]) => n), backgroundColor: generos.map((_, i) => PALETTE[i % PALETTE.length]), borderRadius: 5, borderSkipped: false }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#64748b', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' }, border: { display: false } },
+                    y: { ticks: { color: '#94a3b8', font: { size: 12 } }, grid: { display: false }, border: { display: false } }
+                }
+            }
+        });
 
-    async function buscarPorTermino() {
-        const q = document.getElementById('b-termino').value;
-        if (!q) return;
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/buscar?q=${encodeURIComponent(q)}`);
-            mostrarJSON('resp-buscar', data);
-        } catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
-    }
+        // ── Gráfico 3: Barras verticales - stock ──
+        const titulos = libros.map(l => l.titulo.length > 18 ? l.titulo.substring(0,16) + '…' : l.titulo);
+        const stocks  = libros.map(l => l.stock);
+        const stockColors = stocks.map(s => s === 0 ? '#e24b4a' : s <= 2 ? '#ba7517' : '#1d9e75');
 
-    async function buscarPorGenero() {
-        const genero = document.getElementById('b-genero').value;
-        if (!genero) return;
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/genero/${encodeURIComponent(genero)}`);
-            mostrarJSON('resp-buscar', data);
-        } catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
-    }
+        chartStockInst = new Chart(document.getElementById('chartStock'), {
+            type: 'bar',
+            data: {
+                labels: titulos,
+                datasets: [{ label: 'Stock', data: stocks, backgroundColor: stockColors, borderRadius: 5, borderSkipped: false }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    tooltip: { callbacks: { title: (ctx) => libros[ctx[0].dataIndex].titulo } }
+                },
+                scales: {
+                    x: { ticks: { color: '#94a3b8', font: { size: 11 }, maxRotation: 20, autoSkip: false }, grid: { display: false }, border: { display: false } },
+                    y: { ticks: { color: '#64748b', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' }, border: { display: false } }
+                }
+            }
+        });
 
-    async function buscarPorEstado() {
-        const estado = document.getElementById('b-estado').value;
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/estado/${estado}`);
-            mostrarJSON('resp-buscar', data);
-        } catch(e) { mostrarJSON('resp-buscar', { error: 'Error de conexión' }); }
-    }
+        // ── Gráfico 4: Línea - precios ──
+        const precios = libros.map(l => l.precio ?? 0);
+        chartPrecioInst = new Chart(document.getElementById('chartPrecio'), {
+            type: 'line',
+            data: {
+                labels: titulos,
+                datasets: [{
+                    label: 'Precio S/.', data: precios,
+                    borderColor: '#5dcaa5', backgroundColor: 'rgba(29,158,117,0.15)',
+                    pointBackgroundColor: '#1d9e75', pointRadius: 5, pointHoverRadius: 7,
+                    fill: true, tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (ctx) => libros[ctx[0].dataIndex].titulo,
+                            label: (ctx) => ` S/. ${ctx.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#94a3b8', font: { size: 11 }, autoSkip: false, maxRotation: 20 }, grid: { display: false }, border: { display: false } },
+                    y: { ticks: { color: '#64748b', callback: v => 'S/. ' + v.toFixed(0) }, grid: { color: 'rgba(255,255,255,0.06)' }, border: { display: false } }
+                }
+            }
+        });
 
-    // ── ACTUALIZAR ──────────────────────────────────
-    async function cargarParaEditar() {
-        const id = document.getElementById('a-id').value;
-        if (!id) return mostrarAlerta('alerta-actualizar', 'error', 'Ingresa un ID');
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`);
-            if (!ok) return mostrarAlerta('alerta-actualizar', 'error', data.mensaje);
-            const l = data.datos;
-            document.getElementById('a-titulo').value = l.titulo || '';
-            document.getElementById('a-autor').value = l.autor || '';
-            document.getElementById('a-isbn').value = l.isbn || '';
-            document.getElementById('a-genero').value = l.genero || '';
-            document.getElementById('a-anio').value = l.anioPublicacion || '';
-            document.getElementById('a-stock').value = l.stock ?? '';
-            document.getElementById('a-precio').value = l.precio ?? '';
-            document.getElementById('a-estado').value = l.estado || 'DISPONIBLE';
-            mostrarAlerta('alerta-actualizar', 'ok', `✅ Libro "${l.titulo}" cargado`);
-        } catch(e) {
-            mostrarAlerta('alerta-actualizar', 'error', '❌ Error de conexión');
-        }
-    }
+        mostrarJSON('resp-stats', resStats.data);
 
-    async function actualizarLibro() {
-        const id = document.getElementById('a-id').value;
-        if (!id) return mostrarAlerta('alerta-actualizar', 'error', 'Carga primero un libro');
-        const body = {
-            titulo: document.getElementById('a-titulo').value,
-            autor: document.getElementById('a-autor').value,
-            isbn: document.getElementById('a-isbn').value,
-            genero: document.getElementById('a-genero').value,
-            anioPublicacion: parseInt(document.getElementById('a-anio').value) || null,
-            stock: parseInt(document.getElementById('a-stock').value) || 0,
-            precio: parseFloat(document.getElementById('a-precio').value) || null,
-            estado: document.getElementById('a-estado').value
-        };
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-            mostrarAlerta('alerta-actualizar', ok ? 'ok' : 'error', data.mensaje);
-            mostrarJSON('resp-actualizar', data);
-        } catch(e) {
-            mostrarAlerta('alerta-actualizar', 'error', '❌ Error de conexión');
-        }
+    } catch(e) {
+        document.getElementById('stats-metricas').innerHTML =
+            '<div style="color:#ef4444;padding:20px">❌ No se pudo conectar. ¿Está el backend ejecutándose?</div>';
     }
+}
 
-    // ── ELIMINAR ────────────────────────────────────
-    async function eliminarLibro() {
-        const id = document.getElementById('e-id').value;
-        if (!id) return;
-        if (!confirm(`¿Confirmas eliminar el libro ID ${id}? Esta acción no se puede deshacer.`)) return;
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/${id}`, { method: 'DELETE' });
-            mostrarAlerta('alerta-eliminar', ok ? 'ok' : 'error', data.mensaje);
-            mostrarJSON('resp-eliminar', data);
-        } catch(e) {
-            mostrarAlerta('alerta-eliminar', 'error', '❌ Error de conexión');
-        }
-    }
-
-    // ── ESTADÍSTICAS ────────────────────────────────
-    async function cargarEstadisticas() {
-        try {
-            const { ok, data } = await fetchAPI(`${BASE_URL}/estadisticas`);
-            if (!ok) return;
-            const s = data.datos;
-            const generoHTML = Object.entries(s.porGenero || {})
-                .map(([g, n]) => `<div class="stat-card"><div class="numero">${n}</div><div class="label">${g}</div></div>`)
-                .join('');
-            document.getElementById('stats-container').innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="numero">${s.totalLibros}</div><div class="label">Total Libros</div></div>
-                    <div class="stat-card"><div class="numero" style="color:#10b981">${s.disponibles}</div><div class="label">Disponibles</div></div>
-                    <div class="stat-card"><div class="numero" style="color:#f59e0b">${s.prestados}</div><div class="label">Prestados</div></div>
-                    <div class="stat-card"><div class="numero" style="color:#ef4444">${s.agotados}</div><div class="label">Agotados</div></div>
-                    ${generoHTML}
-                </div>
-            `;
-            mostrarJSON('resp-stats', data);
-        } catch(e) {
-            document.getElementById('stats-container').innerHTML =
-                '<div style="color:#ef4444;padding:20px">❌ No se pudo conectar con el servidor. ¿Está el backend ejecutándose?</div>';
-        }
-    }
-
-    // Cargar lista al iniciar
-    window.onload = () => listarLibros();
+window.onload = () => listarLibros();
 </script>
 </body>
 </html>

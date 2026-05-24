@@ -13,17 +13,17 @@ Este repositorio contiene la implementación de la Guía de Laboratorio Nro. 06 
 | **Escuela** | Ingeniería de Sistemas |
 | **Semestre** | 2026A |
 | **Docente** | Mg. Maribel Molina Barriga |
-| **Tipo** | Grupal (máx. 5 integrantes) |
+| **Tipo** | Grupal |
 
 ---
 
 ## 👥 Integrantes — Grupo N
 
-- Integrante 1
-- Integrante 2
-- Integrante 3
-- Integrante 4
-- Integrante 5
+- Mamani Anahua Victor Narciso
+- Maldonado Vilca Victor Gonzalo
+- Larico Rodriguez Bryan Larico
+- Quispe Madariaga Jeferson Jofre
+- Ramirez Ccahuana, Max Edu
 
 ---
 
@@ -45,7 +45,7 @@ Implementación de una API completa para gestionar libros, siguiendo los princip
 ## 🗂️ Estructura del Proyecto
 
 ```
-biblioteca-api/
+Ejercicio01/
 │
 ├── pom.xml                                          ← Dependencias Maven
 ├── cliente.html                                     ← Cliente web (abrir en navegador)
@@ -148,19 +148,9 @@ Verifica que tengas instalado lo siguiente antes de ejecutar:
 
 ### Paso 1 — Ubicar el proyecto
 
-Coloca la carpeta `biblioteca-api/` en tu máquina. Asegúrate de que la estructura de carpetas sea la mostrada arriba y que el archivo `pom.xml` esté en la raíz.
+Coloca la carpeta `Ejercicio01/` en tu máquina. Asegúrate de que la estructura de carpetas sea la mostrada arriba y que el archivo `pom.xml` esté en la raíz.
 
 ### Paso 2 — Abrir una terminal en la carpeta raíz
-
-```bash
-# En Windows
-cd C:\Users\TuNombre\Documents\biblioteca-api
-
-# En Linux / Mac
-cd /home/tuusuario/biblioteca-api
-```
-
-> En IntelliJ IDEA puedes abrir la terminal integrada con `Alt + F12`.
 
 ### Paso 3 — Compilar el proyecto
 
