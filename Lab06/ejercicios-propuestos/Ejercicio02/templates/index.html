@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes — API RESTful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            color: #1e1e1e;
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 32px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e1e1e;
+            letter-spacing: -0.2px;
+        }
+        .topbar-tag {
+            font-size: .7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: #6c6c6c;
+            background: #ebebeb;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* ── Layout ── */
+        .page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin-bottom: 4px;
+        }
+        .page-header p {
+            font-size: .875rem;
+            color: #7a7a7a;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: .875rem;
+            font-weight: 600;
+            color: #1e1e1e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        /* ── Form ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        label {
+            font-size: .75rem;
+            font-weight: 600;
+            color: #5a5a5a;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+        input, select {
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: .875rem;
+            font-family: 'Inter', sans-serif;
+            color: #1e1e1e;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236c6c6c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+        select option {
+            background: #fff;
+            color: #1e1e1e;
+        }
+        input:focus, select:focus {
+            border-color: #333;
+            box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+        }
+        input::placeholder { color: #b0b0b0; }
+
+        /* ── Validation errors ── */
+        input.input-error, select.input-error {
+            border-color: #c0392b;
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, .08);
+        }
+        .field-error {
+            font-size: .72rem;
+            color: #c0392b;
+            min-height: 0;
+            display: none;
+        }
+        .field-error.visible { display: block; }
+
+        /* ── Buttons ── */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+            grid-column: 1 / -1;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+        }
+        .btn:active { transform: scale(.97); }
+
+        .btn-primary {
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #333; }
+
+        .btn-edit {
+            background: #e8e8e8;
+            color: #1e1e1e;
+        }
+        .btn-edit:hover { background: #d6d6d6; }
+
+        .btn-danger {
+            background: #fff;
+            color: #c0392b;
+            border: 1px solid #e0e0e0;
+        }
+        .btn-danger:hover { background: #fdf2f2; border-color: #c0392b; }
+
+        .btn-secondary {
+            background: #fff;
+            color: #5a5a5a;
+            border: 1px solid #d0d0d0;
+        }
+        .btn-secondary:hover { background: #f5f5f5; }
+
+        .btn-sm { padding: 6px 14px; font-size: .75rem; border-radius: 6px; }
+
+        /* ── Table ── */
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            font-size: .7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #7a7a7a;
+            text-align: left;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        tbody tr { transition: background .15s; }
+        tbody tr:hover { background: #fafafa; }
+        tbody td {
+            padding: 12px 16px;
+            font-size: .85rem;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .actions { display: flex; gap: 6px; }
+
+        /* ── Badge ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ebebeb;
+            color: #1e1e1e;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            min-width: 22px;
+            margin-left: 8px;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 52px 20px;
+            color: #aaa;
+        }
+        .empty-state svg { margin-bottom: 16px; }
+        .empty-state p { font-size: .875rem; line-height: 1.5; }
+
+        /* ── Toast (ahora en la parte superior) ── */
+        .toast-container {
+            position: fixed;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 11px 22px;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #fff;
+            animation: slideDown .3s cubic-bezier(.22,.68,0,1.2);
+            box-shadow: 0 4px 16px rgba(0,0,0,.14);
+            pointer-events: auto;
+            white-space: nowrap;
+        }
+        .toast.success { background: #2e7d5e; }   /* verde sobrio */
+        .toast.error   { background: #c0392b; }
+        .toast.neutral { background: #2d3436; }
+        @keyframes slideDown {
+            from { transform: translateY(-16px); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
+        }
+
+        /* ── Modal de confirmación ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeOverlay .2s ease;
+        }
+        @keyframes fadeOverlay {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .modal {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            padding: 32px 28px 24px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.14);
+            animation: scaleIn .22s cubic-bezier(.22,.68,0,1.2);
+        }
+        @keyframes scaleIn {
+            from { transform: scale(.94); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+        .modal-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: #fdf2f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin-bottom: 8px;
+        }
+        .modal-body {
+            font-size: .875rem;
+            color: #7a7a7a;
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-modal-cancel {
+            background: #fff;
+            color: #5a5a5a;
+            border: 1px solid #d0d0d0;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .btn-modal-cancel:hover { background: #f5f5f5; }
+        .btn-modal-confirm {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, transform .1s;
+        }
+        .btn-modal-confirm:hover  { background: #a93226; }
+        .btn-modal-confirm:active { transform: scale(.97); }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: column; }
+            .topbar { padding: 0 16px; }
+            .page { padding: 20px 16px 48px; }
+            .modal-actions { flex-direction: column-reverse; }
+            .btn-modal-cancel,
+            .btn-modal-confirm { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <span class="topbar-title">Gestión de Estudiantes</span>
+        <span class="topbar-tag">REST API</span>
+    </div>
+
+    <div class="page">
+        <div class="page-header">
+            <h1>Estudiantes</h1>
+            <p>Administra el registro de estudiantes mediante operaciones CRUD</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card">
+            <div class="card-title" id="formTitle">Registrar nuevo estudiante</div>
+            <input type="hidden" id="editId" value="">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo</label>
+                    <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+                    <span class="field-error" id="err-nombre"></span>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" placeholder="correo@ejemplo.com">
+                    <span class="field-error" id="err-email"></span>
+                </div>
+                <div class="form-group">
+                    <label for="carrera">Carrera</label>
+                    <input type="text" id="carrera" placeholder="Ej: Ingeniería de Sistemas">
+                    <span class="field-error" id="err-carrera"></span>
+                </div>
+                <div class="form-group">
+                    <label for="semestre">Semestre</label>
+                    <select id="semestre">
+                        <option value="">Seleccionar semestre</option>
+                        <option value="I">I</option>
+                        <option value="II">II</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                        <option value="V">V</option>
+                        <option value="VI">VI</option>
+                        <option value="VII">VII</option>
+                        <option value="VIII">VIII</option>
+                        <option value="IX">IX</option>
+                        <option value="X">X</option>
+                    </select>
+                    <span class="field-error" id="err-semestre"></span>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="btnGuardar" onclick="guardar()">Registrar</button>
+                    <button class="btn btn-secondary" id="btnCancelar" onclick="cancelar()" style="display:none">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card">
+            <div class="card-title">
+                Lista de estudiantes
+                <span class="badge" id="contador">0</span>
+            </div>
+            <div id="tablaContainer">
+                <div class="empty-state" id="emptyState">
+                    <svg width="48" height="48" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <p>No hay estudiantes registrados.<br>Agrega el primero usando el formulario.</p>
+                </div>
+                <table id="tabla" style="display:none">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Carrera</th>
+                            <th>Semestre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container (parte superior centrada) -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- Modal de confirmación de eliminación -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none" onclick="cerrarModal(event)">
+        <div class="modal">
+            <div class="modal-icon">
+                <svg width="22" height="22" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+            </div>
+            <div class="modal-title">Eliminar estudiante</div>
+            <div class="modal-body" id="modalMsg">¿Estás seguro de que deseas eliminar a este estudiante? Esta acción no se puede deshacer.</div>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-modal-confirm" id="btnConfirmarEliminar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/estudiantes';
+
+        /* ── Toast ── */
+        function toast(msg, type = 'success') {
+            const c = document.getElementById('toasts');
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.style.transition = 'opacity .3s';
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 300);
+            }, 2800);
+        }
+
+        /* ── Modal de confirmación ── */
+        let _pendingDeleteId = null;
+
+        function confirmarEliminar(id, nombre) {
+            _pendingDeleteId = id;
+            document.getElementById('modalMsg').textContent =
+                `¿Estás seguro de que deseas eliminar a "${nombre}"? Esta acción no se puede deshacer.`;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function cerrarModal(e) {
+            // Cierra si se hizo click en el overlay o en el botón cancelar
+            if (e && e.target !== document.getElementById('modalOverlay')) return;
+            document.getElementById('modalOverlay').style.display = 'none';
+            _pendingDeleteId = null;
+        }
+
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', async () => {
+            if (_pendingDeleteId === null) return;
+            const id = _pendingDeleteId;
+            document.getElementById('modalOverlay').style.display = 'none';
+            _pendingDeleteId = null;
+            await fetch(API + '/' + id, { method: 'DELETE' });
+            toast('Estudiante eliminado', 'error');
+            cargar();
+        });
+
+        /* ── Carga de datos ── */
+        async function cargar() {
+            const res = await fetch(API);
+            const data = await res.json();
+            const tbody = document.getElementById('tbody');
+            const tabla = document.getElementById('tabla');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('contador').textContent = data.length;
+
+            if (data.length === 0) {
+                tabla.style.display = 'none';
+                empty.style.display = '';
+                return;
+            }
+
+            tabla.style.display = '';
+            empty.style.display = 'none';
+            tbody.innerHTML = data.map(e => `<tr>
+                <td>${e.id}</td>
+                <td>${e.nombre || ''}</td>
+                <td>${e.email || ''}</td>
+                <td>${e.carrera || ''}</td>
+                <td>${e.semestre || ''}</td>
+                <td class="actions">
+                    <button class="btn btn-edit btn-sm" onclick="editar(${e.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmarEliminar(${e.id}, '${(e.nombre || '').replace(/'/g, "\\'")}')">Eliminar</button>
+                </td>
+            </tr>`).join('');
+        }
+
+        /* ── Validación ── */
+        const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const NAME_RE  = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+
+        function setFieldError(id, msg) {
+            const el  = document.getElementById(id);
+            const err = document.getElementById('err-' + id);
+            if (msg) {
+                el.classList.add('input-error');
+                err.textContent = msg;
+                err.classList.add('visible');
+            } else {
+                el.classList.remove('input-error');
+                err.textContent = '';
+                err.classList.remove('visible');
+            }
+        }
+
+        function clearAllErrors() {
+            ['nombre', 'email', 'carrera', 'semestre'].forEach(id => setFieldError(id, ''));
+        }
+
+        ['nombre', 'email', 'carrera', 'semestre'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input',  () => setFieldError(id, ''));
+            el.addEventListener('change', () => setFieldError(id, ''));
+        });
+
+        function validarFrontend(body) {
+            let valido = true;
+            clearAllErrors();
+
+            if (!body.nombre) {
+                setFieldError('nombre', 'El nombre es obligatorio'); valido = false;
+            } else if (body.nombre.length < 3) {
+                setFieldError('nombre', 'Debe tener al menos 3 caracteres'); valido = false;
+            } else if (!NAME_RE.test(body.nombre)) {
+                setFieldError('nombre', 'Solo puede contener letras y espacios'); valido = false;
+            }
+
+            if (!body.email) {
+                setFieldError('email', 'El correo es obligatorio'); valido = false;
+            } else if (!EMAIL_RE.test(body.email)) {
+                setFieldError('email', 'Formato inválido (ej: correo@dominio.com)'); valido = false;
+            }
+
+            if (!body.carrera) {
+                setFieldError('carrera', 'La carrera es obligatoria'); valido = false;
+            } else if (body.carrera.length < 3) {
+                setFieldError('carrera', 'Debe tener al menos 3 caracteres'); valido = false;
+            }
+
+            if (!body.semestre) {
+                setFieldError('semestre', 'Selecciona un semestre'); valido = false;
+            }
+
+            return valido;
+        }
+
+        /* ── CRUD ── */
+        async function guardar() {
+            const body = {
+                nombre:   document.getElementById('nombre').value.trim(),
+                email:    document.getElementById('email').value.trim(),
+                carrera:  document.getElementById('carrera').value.trim(),
+                semestre: document.getElementById('semestre').value
+            };
+
+            if (!validarFrontend(body)) return;
+
+            const editId = document.getElementById('editId').value;
+            let res;
+            if (editId !== '') {
+                res = await fetch(API + '/' + editId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            } else {
+                res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            }
+
+            const data = await res.json();
+            if (!res.ok) {
+                const errores = data.errores || ['Error desconocido'];
+                errores.forEach(e => toast(e, 'error'));
+                return;
+            }
+
+            toast(editId !== '' ? 'Estudiante actualizado' : 'Estudiante registrado', 'success');
+            cancelar();
+            cargar();
+        }
+
+        async function editar(id) {
+            const res  = await fetch(API);
+            const data = await res.json();
+            const e    = data.find(x => x.id === id);
+            if (!e) return;
+
+            document.getElementById('nombre').value   = e.nombre   || '';
+            document.getElementById('email').value    = e.email    || '';
+            document.getElementById('carrera').value  = e.carrera  || '';
+            document.getElementById('semestre').value = e.semestre || '';
+            document.getElementById('editId').value   = id;
+            document.getElementById('formTitle').textContent       = 'Editar estudiante';
+            document.getElementById('btnGuardar').textContent      = 'Actualizar';
+            document.getElementById('btnCancelar').style.display   = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelar() {
+            document.getElementById('nombre').value   = '';
+            document.getElementById('email').value    = '';
+            document.getElementById('carrera').value  = '';
+            document.getElementById('semestre').value = '';
+            document.getElementById('editId').value   = '';
+            document.getElementById('formTitle').textContent     = 'Registrar nuevo estudiante';
+            document.getElementById('btnGuardar').textContent    = 'Registrar';
+            document.getElementById('btnCancelar').style.display = 'none';
+            clearAllErrors();
+        }
+
+        cargar();
+    </script>
+</body>
+</html>
