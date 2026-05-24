@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 // Esta opción le indica a gRPC que use exactamente el mismo paquete de tu laboratorio
-option java_package = "Lab05.ejercicios_propuestos.ejercicio02.java";
+option java_package = "ejercicio02.java";
 option java_multiple_files = true;
 
 service Converter {

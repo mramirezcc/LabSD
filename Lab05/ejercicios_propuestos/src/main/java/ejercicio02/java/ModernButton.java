@@ -1,4 +1,4 @@
-package Lab05.ejercicios_propuestos.ejercicio02.java;
+package ejercicio02.java;
 
 import javax.swing.*;
 import java.awt.*;

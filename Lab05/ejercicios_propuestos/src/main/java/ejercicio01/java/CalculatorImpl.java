@@ -1,4 +1,4 @@
-package Lab05.ejercicios_propuestos.ejercicio01.java;
+package ejercicio01.java;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;

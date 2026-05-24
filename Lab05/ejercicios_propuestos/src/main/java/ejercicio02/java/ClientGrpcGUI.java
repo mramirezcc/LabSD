@@ -1,4 +1,4 @@
-package Lab05.ejercicios_propuestos.ejercicio02.java;
+package ejercicio02.java;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
