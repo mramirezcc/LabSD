@@ -7,6 +7,17 @@ estudiantes = []
 _next_id = 1
 
 SEMESTRES_VALIDOS = {'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'}
+CARRERAS_VALIDAS = {
+    'Ingeniería de Sistemas',
+    'Ingeniería Industrial',
+    'Ingeniería Civil',
+    'Ingeniería Electrónica',
+    'Ciencia de la Computación',
+    'Administración',
+    'Contabilidad',
+    'Medicina',
+    'Derecho'
+}
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 
@@ -36,11 +47,11 @@ def validar_estudiante(datos):
     elif not EMAIL_REGEX.match(email):
         errores.append('El correo electrónico no tiene un formato válido')
 
-    # Carrera: obligatorio, mínimo 3 caracteres
+    # Carrera: obligatorio, valor válido
     if not carrera:
         errores.append('La carrera es obligatoria')
-    elif len(carrera) < 3:
-        errores.append('La carrera debe tener al menos 3 caracteres')
+    elif carrera not in CARRERAS_VALIDAS:
+        errores.append('La carrera seleccionada no es válida')
 
     # Semestre: obligatorio, valor válido
     if not semestre:

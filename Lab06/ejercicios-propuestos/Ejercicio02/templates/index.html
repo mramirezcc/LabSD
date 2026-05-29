@@ -398,7 +398,18 @@
                 </div>
                 <div class="form-group">
                     <label for="carrera">Carrera</label>
-                    <input type="text" id="carrera" placeholder="Ej: Ingeniería de Sistemas">
+                    <select id="carrera">
+                        <option value="">Seleccionar carrera</option>
+                        <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                        <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                        <option value="Ingeniería Civil">Ingeniería Civil</option>
+                        <option value="Ingeniería Electrónica">Ingeniería Electrónica</option>
+                        <option value="Ciencia de la Computación">Ciencia de la Computación</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Contabilidad">Contabilidad</option>
+                        <option value="Medicina">Medicina</option>
+                        <option value="Derecho">Derecho</option>
+                    </select>
                     <span class="field-error" id="err-carrera"></span>
                 </div>
                 <div class="form-group">
@@ -522,6 +533,7 @@
             _pendingDeleteId = null;
             await fetch(API + '/' + id, { method: 'DELETE' });
             toast('Estudiante eliminado', 'error');
+            cancelar();
             cargar();
         });
 
@@ -601,10 +613,22 @@
                 setFieldError('email', 'Formato inválido (ej: correo@dominio.com)'); valido = false;
             }
 
+            const CARRERAS_VALIDAS = [
+                'Ingeniería de Sistemas',
+                'Ingeniería Industrial',
+                'Ingeniería Civil',
+                'Ingeniería Electrónica',
+                'Ciencia de la Computación',
+                'Administración',
+                'Contabilidad',
+                'Medicina',
+                'Derecho'
+            ];
+
             if (!body.carrera) {
                 setFieldError('carrera', 'La carrera es obligatoria'); valido = false;
-            } else if (body.carrera.length < 3) {
-                setFieldError('carrera', 'Debe tener al menos 3 caracteres'); valido = false;
+            } else if (!CARRERAS_VALIDAS.includes(body.carrera)) {
+                setFieldError('carrera', 'La carrera seleccionada no es válida'); valido = false;
             }
 
             if (!body.semestre) {
