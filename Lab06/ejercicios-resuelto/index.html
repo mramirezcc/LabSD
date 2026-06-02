@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente API Productos</title>
+</head>
+<body>
+    <h2>Lista Productos</h2>
+    <button onclick="listar()">Consultar</button>
+    
+    <ul id="lista"></ul>
+
+    <script>
+        async function listar(){
+            try {
+                // Invocación remota al servidor Flask
+                let r = await fetch("http://127.0.0.1:5000/productos");
+                let datos = await r.json();
+                
+                let lista = document.getElementById("lista");
+                lista.innerHTML = ""; // Limpieza del contenedor
+                
+                // Inserción dinámica de los elementos en el DOM
+                datos.forEach(p => {
+                    lista.innerHTML += `<li>${p.nombre}</li>`;
+                });
+            } catch (error) {
+                console.error("Error al consumir la API:", error);
+            }
+        }
+    </script>
+</body>
+</html>
