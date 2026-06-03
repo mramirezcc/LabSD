@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora SOAP | Lab 07 — Sistemas Distribuidos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0b0e14;
+      --panel:     #111620;
+      --border:    #1e2a3a;
+      --accent:    #00d4ff;
+      --accent2:   #ff6b35;
+      --green:     #39ff85;
+      --red:       #ff4060;
+      --text:      #c8d8e8;
+      --muted:     #4a5a6e;
+      --mono:      'Share Tech Mono', monospace;
+      --sans:      'Barlow', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      /* grid texture */
+      background-image:
+        linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.2rem;
+      display: flex;
+      align-items: flex-end;
+      gap: 1.2rem;
+    }
+    .logo-tag {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--accent);
+      background: rgba(0,212,255,.08);
+      border: 1px solid rgba(0,212,255,.3);
+      padding: .25rem .6rem;
+      border-radius: 3px;
+      white-space: nowrap;
+      letter-spacing: .1em;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      line-height: 1;
+    }
+    header h1 span { color: var(--accent); }
+    header p {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .3rem;
+      font-weight: 300;
+    }
+
+    /* ── Layout ── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 820px;
+    }
+    @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.4rem 1.6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+    }
+    .panel.span2 { grid-column: 1 / -1; }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--accent);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .panel-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Inputs ── */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .8rem;
+    }
+    label {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+      width: 1.8rem;
+      flex-shrink: 0;
+    }
+    input[type="number"] {
+      flex: 1;
+      background: #0b0e14;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      padding: .5rem .8rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,212,255,.08);
+    }
+    input[type="number"]::-webkit-inner-spin-button { opacity: .4; }
+
+    /* ── Operator badge ── */
+    .op-badge {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      color: var(--accent2);
+      text-align: center;
+      padding: .1rem 0;
+      width: 100%;
+      margin: .4rem 0 .8rem;
+    }
+
+    /* ── Buttons ── */
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem;
+      margin-top: .4rem;
+    }
+    .btn-op {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .95rem;
+      padding: .65rem;
+      cursor: pointer;
+      transition: all .18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+    .btn-op:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,212,255,.06);
+    }
+    .btn-op:active { transform: scale(.97); }
+    .btn-op.active {
+      border-color: var(--accent);
+      background: rgba(0,212,255,.12);
+      color: var(--accent);
+    }
+    .sym { font-size: 1.1rem; }
+
+    /* ── Execute ── */
+    .btn-exec {
+      width: 100%;
+      margin-top: 1rem;
+      padding: .8rem;
+      background: linear-gradient(135deg, var(--accent), #0099cc);
+      border: none;
+      border-radius: 7px;
+      color: #000;
+      font-family: var(--mono);
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-exec::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.15);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .btn-exec:hover::after { opacity: 1; }
+    .btn-exec:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    /* ── Result ── */
+    .result-box {
+      background: #070a0f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      margin-top: .8rem;
+      min-height: 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .result-label {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--muted);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: .4rem;
+    }
+    .result-value {
+      font-family: var(--mono);
+      font-size: 2.4rem;
+      font-weight: 400;
+      color: var(--green);
+      transition: color .3s;
+      min-height: 2.8rem;
+    }
+    .result-value.error { color: var(--red); font-size: 1rem; line-height: 1.5; }
+    .result-value.loading { color: var(--muted); font-size: 1rem; animation: blink 1s infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── SOAP Envelope viewer ── */
+    .envelope-box {
+      background: #070a0f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+    }
+    pre {
+      font-family: var(--mono);
+      font-size: .72rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .xml-tag   { color: #569cd6; }
+    .xml-attr  { color: #9cdcfe; }
+    .xml-val   { color: #ce9178; }
+    .xml-ns    { color: var(--muted); }
+    .xml-value { color: var(--green); }
+
+    /* ── Log ── */
+    .log-box {
+      background: #070a0f;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .8rem 1rem;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: var(--mono);
+      font-size: .72rem;
+      line-height: 1.8;
+    }
+    .log-entry { display: flex; gap: .6rem; }
+    .log-time  { color: var(--muted); flex-shrink: 0; }
+    .log-msg.ok  { color: var(--green); }
+    .log-msg.err { color: var(--red); }
+    .log-msg.inf { color: var(--accent); }
+
+    /* ── Status indicator ── */
+    .status-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-right: .4rem;
+      background: var(--muted);
+    }
+    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    .status-dot.offline { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+    /* ── Info section ── */
+    .info-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: .6rem;
+    }
+    .info-chip {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      padding: .3rem .7rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+    .info-chip b { color: var(--text); }
+
+    /* ── CORS note ── */
+    .cors-note {
+      background: rgba(255,107,53,.07);
+      border: 1px solid rgba(255,107,53,.3);
+      border-radius: 6px;
+      padding: .9rem 1.1rem;
+      font-size: .8rem;
+      color: #ffaa80;
+      line-height: 1.6;
+      margin-top: .8rem;
+    }
+    .cors-note strong { color: var(--accent2); }
+    .cors-note code {
+      font-family: var(--mono);
+      font-size: .75rem;
+      background: rgba(0,0,0,.4);
+      padding: .1rem .4rem;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-tag">LAB-07 / SOAP</div>
+    <h1>Calculadora <span>SOAP</span></h1>
+    <p>Sistemas Distribuidos · UNSA 2026A · Grupo B</p>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ── Panel izquierdo: inputs + operación ── -->
+  <div class="panel">
+    <div class="panel-label">Parámetros de entrada</div>
+
+    <div class="input-row">
+      <label>A</label>
+      <input type="number" id="numA" value="5" />
+    </div>
+    <div class="input-row">
+      <label>B</label>
+      <input type="number" id="numB" value="8" />
+    </div>
+
+    <div class="panel-label" style="margin-top:1.2rem">Operación</div>
+    <div class="ops-grid">
+      <button class="btn-op active" data-op="Add"      onclick="selOp(this)"><span class="sym">+</span> Add</button>
+      <button class="btn-op"        data-op="Subtract" onclick="selOp(this)"><span class="sym">−</span> Subtract</button>
+      <button class="btn-op"        data-op="Multiply" onclick="selOp(this)"><span class="sym">×</span> Multiply</button>
+      <button class="btn-op"        data-op="Divide"   onclick="selOp(this)"><span class="sym">÷</span> Divide</button>
+    </div>
+
+    <button class="btn-exec" id="btnExec" onclick="ejecutarSOAP()">
+      ▶ SEND SOAP REQUEST
+    </button>
+
+    <div class="result-box">
+      <div class="result-label">Resultado</div>
+      <div class="result-value" id="resultado">—</div>
+    </div>
+  </div>
+
+  <!-- ── Panel derecho: envelope + log ── -->
+  <div class="panel">
+    <div class="panel-label">
+      <span class="status-dot" id="statusDot"></span>
+      Estado del servicio
+    </div>
+
+    <div class="info-row">
+      <div class="info-chip">Protocolo <b>SOAP 1.1</b></div>
+      <div class="info-chip">Transporte <b>HTTP POST</b></div>
+      <div class="info-chip">Formato <b>XML</b></div>
+    </div>
+
+    <div class="panel-label" style="margin-top:1.2rem">SOAP Envelope generado</div>
+    <div class="envelope-box">
+      <pre id="envelopeView"><span class="xml-ns">&lt;!-- El envelope aparecerá aquí --&gt;</span></pre>
+    </div>
+
+    <div class="panel-label" style="margin-top:1.2rem">Log de peticiones</div>
+    <div class="log-box" id="logBox">
+      <div class="log-entry">
+        <span class="log-time">00:00:00</span>
+        <span class="log-msg inf">Sistema listo. Esperando petición...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel inferior: análisis CORS ── -->
+  <div class="panel span2">
+    <div class="panel-label">Análisis técnico — Limitaciones SOAP desde navegador</div>
+
+    <div class="cors-note">
+      <strong>¿Por qué SOAP tiene limitaciones en consumo directo desde el navegador?</strong><br><br>
+      <b>1. Política CORS (Cross-Origin Resource Sharing):</b> Los navegadores bloquean peticiones
+      <code>XMLHttpRequest</code> / <code>fetch</code> a dominios distintos al origen de la página,
+      a menos que el servidor responda con el header <code>Access-Control-Allow-Origin</code>.
+      Los servicios SOAP antiguos raramente incluyen estos headers.<br><br>
+      <b>2. Formato XML complejo:</b> Construir y parsear el envelope SOAP desde JavaScript puro
+      requiere manipulación de DOM XML que es verbose y propensa a errores, a diferencia de JSON en REST.<br><br>
+      <b>3. Ausencia de librerías nativas:</b> El navegador no incluye un cliente SOAP nativo;
+      se necesitan librerías externas como <code>soap.js</code> o proxies intermedios.<br><br>
+      <b>Solución recomendada:</b> Usar un backend intermediario (Node.js / Python con Zeep)
+      que consuma el servicio SOAP y exponga una API REST al frontend.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Estado global ───────────────────────────────────────────
+  let opActual = 'Add';
+  const WSDL   = 'http://www.dneonline.com/calculator.asmx';
+
+  // ─── Selección de operación ───────────────────────────────────
+  function selOp(btn) {
+    document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    opActual = btn.dataset.op;
+    actualizarEnvelope();
+  }
+
+  // ─── Genera el XML del SOAP Envelope ──────────────────────────
+  function generarEnvelope(op, a, b) {
+    return `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <soap:Body>
+    <${op} xmlns="http://tempuri.org/">
+      <intA>${a}</intA>
+      <intB>${b}</intB>
+    </${op}>
+  </soap:Body>
+</soap:Envelope>`;
+  }
+
+  // ─── Colorea el XML para el viewer ────────────────────────────
+  function colorXML(xml) {
+    return xml
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(&lt;\/?)([\w:]+)/g, '<span class="xml-tag">$1$2</span>')
+      .replace(/(xmlns[:\w]*)=/g, '<span class="xml-attr">$1</span>=')
+      .replace(/="([^"]*)"/g, '="<span class="xml-val">$1</span>"')
+      .replace(/(&gt;)(\d+)(&lt;)/g, '$1<span class="xml-value">$2</span>$3');
+  }
+
+  // ─── Actualiza el preview del envelope en tiempo real ─────────
+  function actualizarEnvelope() {
+    const a = document.getElementById('numA').value || '0';
+    const b = document.getElementById('numB').value || '0';
+    document.getElementById('envelopeView').innerHTML =
+      colorXML(generarEnvelope(opActual, a, b));
+  }
+
+  // ─── Agregar línea al log ──────────────────────────────────────
+  function log(msg, tipo = 'inf') {
+    const box  = document.getElementById('logBox');
+    const time = new Date().toLocaleTimeString('es-PE', {hour12:false});
+    const div  = document.createElement('div');
+    div.className = 'log-entry';
+    div.innerHTML  = `<span class="log-time">${time}</span><span class="log-msg ${tipo}">${msg}</span>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ─── Ejecución de la petición SOAP ───────────────────────────
+  async function ejecutarSOAP() {
+    const a   = parseInt(document.getElementById('numA').value) || 0;
+    const b   = parseInt(document.getElementById('numB').value) || 0;
+    const btn = document.getElementById('btnExec');
+    const res = document.getElementById('resultado');
+    const dot = document.getElementById('statusDot');
+
+    actualizarEnvelope();
+    btn.disabled = true;
+    res.className = 'result-value loading';
+    res.textContent = 'enviando...';
+    log(`Enviando ${opActual}(${a}, ${b}) → ${WSDL}`, 'inf');
+
+    const body    = generarEnvelope(opActual, a, b);
+    const action  = `http://tempuri.org/${opActual}`;
+
+    try {
+      const response = await fetch(WSDL, {
+        method : 'POST',
+        headers: {
+          'Content-Type' : 'text/xml; charset=utf-8',
+          'SOAPAction'   : `"${action}"`,
+        },
+        body: body,
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status} — ${response.statusText}`);
+
+      const text   = await response.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+      // El resultado viene en el tag <{Op}Result>
+      const resultTag  = xmlDoc.getElementsByTagNameNS('*', `${opActual}Result`)[0];
+      const valor      = resultTag ? resultTag.textContent : 'N/A';
+
+      res.className   = 'result-value';
+      res.textContent = valor;
+      dot.className   = 'status-dot online';
+      log(`Respuesta recibida: ${opActual}(${a},${b}) = ${valor}`, 'ok');
+
+    } catch (err) {
+      // ── CORS / red ─────────────────────────────────────────────
+      const esCORS = err.message.includes('Failed to fetch') || err.name === 'TypeError';
+      res.className = 'result-value error';
+
+      if (esCORS) {
+        res.textContent = '⚠ CORS bloqueado';
+        dot.className   = 'status-dot offline';
+        log('Error CORS: el navegador bloqueó la petición cross-origin', 'err');
+        log('Usa el cliente Python (cliente_soap.py) para consumir sin restricciones', 'inf');
+      } else {
+        res.textContent = `Error: ${err.message}`;
+        dot.className   = 'status-dot offline';
+        log(`Error: ${err.message}`, 'err');
+      }
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ─── Listeners de inputs ──────────────────────────────────────
+  document.getElementById('numA').addEventListener('input', actualizarEnvelope);
+  document.getElementById('numB').addEventListener('input', actualizarEnvelope);
+
+  // ─── Init ─────────────────────────────────────────────────────
+  actualizarEnvelope();
+</script>
+</body>
+</html>
