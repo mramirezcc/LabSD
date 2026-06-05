@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  db_arequipa:
+    image: postgres:16
+    container_name: db_arequipa
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: almacen_arequipa
+    ports:
+      - "5433:5432"
+
+  db_lima:
+    image: postgres:16
+    container_name: db_lima
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: almacen_lima
+    ports:
+      - "5434:5432"
