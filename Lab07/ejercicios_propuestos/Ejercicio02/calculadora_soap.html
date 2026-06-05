@@ -4,273 +4,340 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Calculadora SOAP | Lab 07 — Sistemas Distribuidos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg:     #0b0e14;
-      --panel:  #111620;
-      --border: #1e2a3a;
-      --accent: #00d4ff;
-      --accent2:#ff6b35;
-      --green:  #39ff85;
-      --red:    #ff4060;
-      --text:   #c8d8e8;
-      --muted:  #4a5a6e;
-      --mono:   'Share Tech Mono', monospace;
-      --sans:   'Barlow', sans-serif;
-    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
+      background: #f8f9fa;
+      color: #1a1a2e;
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem 4rem;
-      background-image:
-        linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+      padding: 2.5rem 1.5rem 4rem;
     }
+
     header {
-      width: 100%; max-width: 820px;
-      margin-bottom: 2.5rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1.2rem;
-      display: flex; align-items: flex-end; gap: 1.2rem;
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .logo-tag {
-      font-family: var(--mono); font-size: .7rem; color: var(--accent);
-      background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.3);
-      padding: .25rem .6rem; border-radius: 3px; white-space: nowrap; letter-spacing: .1em;
+    .header-left h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      letter-spacing: -.02em;
     }
-    header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -.01em; line-height: 1; }
-    header h1 span { color: var(--accent); }
-    header p { font-size: .8rem; color: var(--muted); margin-top: .3rem; font-weight: 300; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; width: 100%; max-width: 820px; }
-    @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
-    .panel {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 8px; padding: 1.4rem 1.6rem; position: relative; overflow: hidden;
+    .header-left h1 span { color: #2563eb; }
+    .header-left p {
+      font-size: .82rem;
+      color: #6b7280;
+      margin-top: .2rem;
+      font-weight: 400;
     }
-    .panel::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, var(--accent), transparent);
+    .header-badge {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 999px;
+      padding: .35rem .9rem;
+      font-size: .75rem;
+      color: #374151;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
-    .panel.span2 { grid-column: 1 / -1; }
-    .panel-label {
-      font-family: var(--mono); font-size: .65rem; color: var(--accent);
-      letter-spacing: .15em; text-transform: uppercase; margin-bottom: 1rem;
-      display: flex; align-items: center; gap: .5rem;
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #d1d5db;
+      flex-shrink: 0;
+      transition: background .3s;
     }
-    .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .input-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; }
-    label { font-family: var(--mono); font-size: .75rem; color: var(--muted); width: 1.8rem; flex-shrink: 0; }
-    input[type="number"] {
-      flex: 1; background: #0b0e14; border: 1px solid var(--border); border-radius: 5px;
-      color: var(--text); font-family: var(--mono); font-size: 1.1rem; padding: .5rem .8rem;
-      outline: none; transition: border-color .2s;
+    .status-dot.online  { background: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.2); }
+    .status-dot.offline { background: #ef4444; }
+
+    .main-card {
+      width: 100%;
+      max-width: 860px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,.08); }
-    input[type="number"]::-webkit-inner-spin-button { opacity: .4; }
-    .ops-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .4rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media(max-width: 580px) { .grid { grid-template-columns: 1fr; } }
+
+    .section-title {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: .85rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      margin-bottom: 1.2rem;
+    }
+    .input-label {
+      font-size: .8rem;
+      font-weight: 500;
+      color: #374151;
+    }
+    .input-field {
+      width: 100%;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      color: #1a1a2e;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      padding: .65rem 1rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .input-field:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+      background: #fff;
+    }
+    .input-field::-webkit-inner-spin-button { opacity: .3; }
+
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+      margin-bottom: 1.4rem;
+    }
     .btn-op {
-      background: transparent; border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text); font-family: var(--mono); font-size: .95rem; padding: .65rem;
-      cursor: pointer; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: .4rem;
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      color: #374151;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .9rem;
+      font-weight: 500;
+      padding: .6rem .5rem;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .35rem;
     }
-    .btn-op:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,.06); }
-    .btn-op:active { transform: scale(.97); }
-    .btn-op.active { border-color: var(--accent); background: rgba(0,212,255,.12); color: var(--accent); }
-    .sym { font-size: 1.1rem; }
+    .btn-op:hover {
+      border-color: #93c5fd;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .btn-op.active {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .btn-op .sym { font-size: 1.15rem; }
+
     .btn-exec {
-      width: 100%; margin-top: 1rem; padding: .8rem;
-      background: linear-gradient(135deg, var(--accent), #0099cc);
-      border: none; border-radius: 7px; color: #000; font-family: var(--mono);
-      font-size: .9rem; font-weight: 700; letter-spacing: .1em; cursor: pointer;
-      transition: all .2s; position: relative; overflow: hidden;
+      width: 100%;
+      padding: .75rem;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
     }
-    .btn-exec:hover { opacity: .9; }
-    .btn-exec:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-exec:hover  { background: #1d4ed8; }
+    .btn-exec:active { transform: scale(.98); }
+    .btn-exec:disabled { background: #93c5fd; cursor: not-allowed; }
+
     .result-box {
-      background: #070a0f; border: 1px solid var(--border); border-radius: 6px;
-      padding: 1rem 1.2rem; margin-top: .8rem; min-height: 4rem;
-      display: flex; flex-direction: column; justify-content: center;
+      background: #f0f9ff;
+      border: 1.5px solid #bae6fd;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      margin-top: 1rem;
     }
-    .result-label { font-family: var(--mono); font-size: .6rem; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; margin-bottom: .4rem; }
-    .result-value { font-family: var(--mono); font-size: 2.4rem; color: var(--green); min-height: 2.8rem; transition: color .3s; }
-    .result-value.error   { color: var(--red);   font-size: 1rem; line-height: 1.5; }
-    .result-value.loading { color: var(--muted); font-size: 1rem; animation: blink 1s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .envelope-box { background: #070a0f; border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.2rem; overflow-x: auto; }
-    pre { font-family: var(--mono); font-size: .72rem; line-height: 1.7; color: var(--text); white-space: pre-wrap; word-break: break-all; }
-    .xml-tag   { color: #569cd6; }
-    .xml-attr  { color: #9cdcfe; }
-    .xml-val   { color: #ce9178; }
-    .xml-value { color: var(--green); }
-    .log-box {
-      background: #070a0f; border: 1px solid var(--border); border-radius: 6px;
-      padding: .8rem 1rem; max-height: 180px; overflow-y: auto;
-      font-family: var(--mono); font-size: .72rem; line-height: 1.8;
+    .result-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #0369a1;
+      margin-bottom: .3rem;
     }
-    .log-entry { display: flex; gap: .6rem; }
-    .log-time  { color: var(--muted); flex-shrink: 0; }
-    .log-msg.ok  { color: var(--green); }
-    .log-msg.err { color: var(--red); }
-    .log-msg.inf { color: var(--accent); }
-    .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .4rem; background: var(--muted); }
-    .status-dot.online  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-    .status-dot.offline { background: var(--red); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-    .info-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .6rem; }
-    .info-chip {
-      font-family: var(--mono); font-size: .65rem; color: var(--muted);
-      background: rgba(255,255,255,.03); border: 1px solid var(--border);
-      padding: .3rem .7rem; border-radius: 20px; display: flex; align-items: center; gap: .35rem;
+    .result-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.4rem;
+      font-weight: 500;
+      color: #1d4ed8;
+      min-height: 2.8rem;
+      line-height: 1;
+      padding-top: .2rem;
     }
-    .info-chip b { color: var(--text); }
-    .cors-note {
-      background: rgba(255,107,53,.07); border: 1px solid rgba(255,107,53,.3);
-      border-radius: 6px; padding: .9rem 1.1rem; font-size: .8rem; color: #ffaa80;
-      line-height: 1.7; margin-top: .8rem;
+    .result-value.error   { color: #dc2626; font-size: 1rem; line-height: 1.5; padding-top: .4rem; }
+    .result-value.loading { color: #93c5fd; font-size: 1rem; padding-top: .4rem; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    .divider {
+      width: 1px;
+      background: #f0f0f0;
+      margin: 0 .5rem;
     }
-    .cors-note strong { color: var(--accent2); display: block; margin-bottom: .5rem; font-size: .85rem; }
-    .cors-note code { font-family: var(--mono); font-size: .75rem; background: rgba(0,0,0,.4); padding: .1rem .4rem; border-radius: 3px; }
-    .proxy-banner {
-      background: rgba(0,212,255,.07); border: 1px solid rgba(0,212,255,.25);
-      border-radius: 6px; padding: .9rem 1.1rem; font-size: .8rem; color: #80e8ff;
-      line-height: 1.7; margin-bottom: 1.2rem;
+    @media(max-width:580px){ .divider { display:none; } }
+
+    .envelope-wrap {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      max-height: 260px;
+      overflow-y: auto;
     }
-    .proxy-banner strong { color: var(--accent); display: block; margin-bottom: .4rem; font-size: .85rem; }
-    .proxy-banner code { font-family: var(--mono); font-size: .75rem; background: rgba(0,0,0,.4); padding: .1rem .4rem; border-radius: 3px; }
-    .arch-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .8rem; font-family: var(--mono); font-size: .75rem; }
-    .arch-box { background: rgba(0,0,0,.4); border: 1px solid var(--border); padding: .35rem .7rem; border-radius: 5px; }
-    .arch-box.hl { border-color: var(--accent); color: var(--accent); }
-    .arch-arrow { color: var(--muted); }
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .73rem;
+      line-height: 1.75;
+      color: #374151;
+      white-space: pre;
+    }
+    .xt  { color: #1d4ed8; }
+    .xa  { color: #0891b2; }
+    .xv  { color: #b45309; }
+    .xn  { color: #22c55e; font-weight: 500; }
+
+    .cors-section {
+      margin-top: 1.8rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #f0f0f0;
+    }
+    .cors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .cors-card {
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+    .cors-card-num {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: .45rem;
+    }
+    .cors-card-title {
+      font-size: .88rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: .4rem;
+    }
+    .cors-card-body {
+      font-size: .8rem;
+      color: #4b5563;
+      line-height: 1.65;
+    }
+    .cors-card-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      background: #f0f0f0;
+      padding: .1rem .35rem;
+      border-radius: 4px;
+      color: #1a1a2e;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo-tag">LAB-07 / SOAP</div>
+  <div class="header-left">
     <h1>Calculadora <span>SOAP</span></h1>
     <p>Sistemas Distribuidos · UNSA 2026A · Grupo B</p>
   </div>
+  <div class="header-badge">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Verificando proxy...</span>
+  </div>
 </header>
 
-<div class="grid">
+<div class="main-card">
+  <div class="grid">
 
-  <!-- Panel izquierdo: inputs -->
-  <div class="panel">
-    <div class="panel-label">Parámetros de entrada</div>
+    <!-- Izquierda: inputs -->
+    <div>
+      <p class="section-title">Parámetros</p>
 
-    <div class="input-row">
-      <label>A</label>
-      <input type="number" id="numA" value="5" />
-    </div>
-    <div class="input-row">
-      <label>B</label>
-      <input type="number" id="numB" value="8" />
-    </div>
+      <div class="input-group">
+        <label class="input-label">Valor A</label>
+        <input type="number" id="numA" class="input-field" value="5" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Valor B</label>
+        <input type="number" id="numB" class="input-field" value="8" />
+      </div>
 
-    <div class="panel-label" style="margin-top:1.2rem">Operación</div>
-    <div class="ops-grid">
-      <button class="btn-op active" data-op="Add"      onclick="selOp(this)"><span class="sym">+</span> Add</button>
-      <button class="btn-op"        data-op="Subtract" onclick="selOp(this)"><span class="sym">−</span> Subtract</button>
-      <button class="btn-op"        data-op="Multiply" onclick="selOp(this)"><span class="sym">×</span> Multiply</button>
-      <button class="btn-op"        data-op="Divide"   onclick="selOp(this)"><span class="sym">÷</span> Divide</button>
-    </div>
+      <p class="section-title" style="margin-top:.4rem">Operación</p>
+      <div class="ops-grid">
+        <button class="btn-op active" data-op="Add"      onclick="selOp(this)"><span class="sym">+</span> Add</button>
+        <button class="btn-op"        data-op="Subtract" onclick="selOp(this)"><span class="sym">−</span> Subtract</button>
+        <button class="btn-op"        data-op="Multiply" onclick="selOp(this)"><span class="sym">×</span> Multiply</button>
+        <button class="btn-op"        data-op="Divide"   onclick="selOp(this)"><span class="sym">÷</span> Divide</button>
+      </div>
 
-    <button class="btn-exec" id="btnExec" onclick="ejecutarSOAP()">
-      ▶ SEND SOAP REQUEST
-    </button>
+      <button class="btn-exec" id="btnExec" onclick="ejecutarSOAP()">
+        Enviar petición SOAP
+      </button>
 
-    <div class="result-box">
-      <div class="result-label">Resultado</div>
-      <div class="result-value" id="resultado">—</div>
-    </div>
-  </div>
-
-  <!-- Panel derecho: status + envelope + log -->
-  <div class="panel">
-    <div class="panel-label">
-      <span class="status-dot" id="statusDot"></span>
-      Estado del servicio
-    </div>
-
-    <div class="info-row">
-      <div class="info-chip">Protocolo <b>SOAP 1.1</b></div>
-      <div class="info-chip">Proxy <b>localhost:5000</b></div>
-      <div class="info-chip">Formato <b>XML</b></div>
-    </div>
-
-    <div class="panel-label" style="margin-top:1.2rem">SOAP Envelope generado</div>
-    <div class="envelope-box">
-      <pre id="envelopeView"><span style="color:var(--muted)">// El envelope aparecerá aquí</span></pre>
-    </div>
-
-    <div class="panel-label" style="margin-top:1.2rem">Log de peticiones</div>
-    <div class="log-box" id="logBox">
-      <div class="log-entry">
-        <span class="log-time">00:00:00</span>
-        <span class="log-msg inf">Sistema listo. Proxy requerido en localhost:5000</span>
+      <div class="result-box">
+        <div class="result-label">Resultado</div>
+        <div class="result-value" id="resultado">—</div>
       </div>
     </div>
-  </div>
 
-  <!-- Panel inferior: instrucciones proxy + análisis CORS -->
-  <div class="panel span2">
-    <div class="panel-label">Cómo ejecutar — Proxy local necesario</div>
-
-    <div class="proxy-banner">
-      <strong>⚙ Arquitectura con Proxy (solución al problema CORS)</strong>
-      El navegador no puede llamar directamente a servicios SOAP externos por la política CORS.
-      Se usa un servidor Python intermedio que sí puede hacerlo.
-      <div class="arch-row">
-        <div class="arch-box hl">Navegador HTML</div>
-        <span class="arch-arrow">──fetch JSON──▶</span>
-        <div class="arch-box hl">proxy_soap.py :5000</div>
-        <span class="arch-arrow">──SOAP XML──▶</span>
-        <div class="arch-box">dneonline.com</div>
-        <span class="arch-arrow">◀──resultado──</span>
-        <div class="arch-box">proxy</div>
-        <span class="arch-arrow">◀──JSON──</span>
-        <div class="arch-box hl">Navegador</div>
+    <!-- Derecha: envelope -->
+    <div>
+      <p class="section-title">SOAP Envelope generado</p>
+      <div class="envelope-wrap">
+        <pre id="envelopeView"><span style="color:#9ca3af">// Escribe los valores para ver el envelope</span></pre>
       </div>
-      <br>
-      Ejecuta en tu terminal:<br>
-      <code>pip install flask flask-cors zeep</code><br>
-      <code>python proxy_soap.py</code><br>
-      Luego abre este HTML y el botón funcionará.
     </div>
 
-    <div class="panel-label" style="margin-top:1rem">Análisis — ¿Por qué SOAP falla directo desde navegador?</div>
-    <div class="cors-note">
-      <strong>1. Política CORS (Cross-Origin Resource Sharing)</strong>
-      El navegador bloquea <code>fetch</code> a dominios distintos al origen de la página
-      a menos que el servidor responda con <code>Access-Control-Allow-Origin</code>.
-      Los servicios SOAP antiguos raramente incluyen ese header.
-
-      <strong style="margin-top:.7rem">2. Construcción manual del XML SOAP</strong>
-      Sin librerías nativas, el desarrollador debe construir el envelope XML a mano,
-      incluyendo namespaces, <code>SOAPAction</code> en el header, y parsear la respuesta XML —
-      proceso verbose y frágil comparado con JSON en REST.
-
-      <strong style="margin-top:.7rem">3. Solución arquitectónica correcta</strong>
-      Usar un backend intermediario (<code>proxy_soap.py</code> con Flask + Zeep) que consuma
-      el servicio SOAP y exponga una API REST/JSON al frontend. El navegador llama JSON,
-      el proxy traduce a SOAP.
-    </div>
   </div>
 
 </div>
 
 <script>
-  const PROXY = 'http://localhost:5000';
-  let opActual = 'Add';
+  const PROXY   = 'http://localhost:5000';
+  let opActual  = 'Add';
 
   function selOp(btn) {
     document.querySelectorAll('.btn-op').forEach(b => b.classList.remove('active'));
@@ -280,25 +347,16 @@
   }
 
   function generarEnvelope(op, a, b) {
-    return `<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope
-  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <${op} xmlns="http://tempuri.org/">
-      <intA>${a}</intA>
-      <intB>${b}</intB>
-    </${op}>
-  </soap:Body>
-</soap:Envelope>`;
+    return `<?xml version="1.0" encoding="utf-8"?>\n<soap:Envelope\n  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n  <soap:Body>\n    <${op} xmlns="http://tempuri.org/">\n      <intA>${a}</intA>\n      <intB>${b}</intB>\n    </${op}>\n  </soap:Body>\n</soap:Envelope>`;
   }
 
   function colorXML(xml) {
     return xml
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/(&lt;\/?)([\w:]+)/g,'<span class="xml-tag">$1$2</span>')
-      .replace(/(xmlns[:\w]*)=/g,'<span class="xml-attr">$1</span>=')
-      .replace(/="([^"]*)"/g,'="<span style="color:#ce9178">$1</span>"')
-      .replace(/(&gt;)(\d+)(&lt;)/g,'$1<span class="xml-value">$2</span>$3');
+      .replace(/(&lt;\/?)([\w:]+)/g, '<span class="xt">$1$2</span>')
+      .replace(/(xmlns[:\w]*)=/g,    '<span class="xa">$1</span>=')
+      .replace(/="([^"]*)"/g,        '="<span class="xv">$1</span>"')
+      .replace(/(&gt;)(\d+)(&lt;)/g, '$1<span class="xn">$2</span>$3');
   }
 
   function actualizarEnvelope() {
@@ -308,31 +366,21 @@
       colorXML(generarEnvelope(opActual, a, b));
   }
 
-  function log(msg, tipo='inf') {
-    const box  = document.getElementById('logBox');
-    const time = new Date().toLocaleTimeString('es-PE',{hour12:false});
-    const div  = document.createElement('div');
-    div.className = 'log-entry';
-    div.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${tipo}">${msg}</span>`;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  // Verifica si el proxy está activo al cargar
   async function checkProxy() {
-    const dot = document.getElementById('statusDot');
+    const dot  = document.getElementById('statusDot');
+    const txt  = document.getElementById('statusText');
     try {
       const r = await fetch(`${PROXY}/status`, {signal: AbortSignal.timeout(2000)});
       if (r.ok) {
         dot.className = 'status-dot online';
-        log('Proxy SOAP detectado en localhost:5000 — listo', 'ok');
+        txt.textContent = 'Proxy activo';
       } else {
         dot.className = 'status-dot offline';
-        log('Proxy responde con error — verifica proxy_soap.py', 'err');
+        txt.textContent = 'Proxy con error';
       }
     } catch {
       dot.className = 'status-dot offline';
-      log('Proxy no detectado. Ejecuta: python proxy_soap.py', 'err');
+      txt.textContent = 'Proxy offline';
     }
   }
 
@@ -342,12 +390,12 @@
     const btn = document.getElementById('btnExec');
     const res = document.getElementById('resultado');
     const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
 
     actualizarEnvelope();
-    btn.disabled = true;
+    btn.disabled    = true;
     res.className   = 'result-value loading';
     res.textContent = 'enviando...';
-    log(`→ ${opActual}(${a}, ${b}) via proxy localhost:5000`, 'inf');
 
     try {
       const response = await fetch(`${PROXY}/soap`, {
@@ -355,27 +403,25 @@
         headers: {'Content-Type': 'application/json'},
         body   : JSON.stringify({operation: opActual, a, b}),
       });
-
       const data = await response.json();
-
       if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
 
       res.className   = 'result-value';
       res.textContent = data.result;
       dot.className   = 'status-dot online';
-      log(`✓ ${opActual}(${a}, ${b}) = ${data.result}`, 'ok');
+      txt.textContent = 'Proxy activo';
 
     } catch (err) {
       res.className = 'result-value error';
       const noProxy = err.message.includes('Failed to fetch') || err.name === 'TypeError';
       if (noProxy) {
-        res.textContent = '⚠ Proxy offline';
+        res.textContent = 'Proxy offline — ejecuta proxy_soap.py';
         dot.className   = 'status-dot offline';
-        log('Error: proxy no disponible. Ejecuta proxy_soap.py', 'err');
+        txt.textContent = 'Proxy offline';
       } else {
         res.textContent = `Error: ${err.message}`;
         dot.className   = 'status-dot offline';
-        log(`Error: ${err.message}`, 'err');
+        txt.textContent = 'Error';
       }
     } finally {
       btn.disabled = false;

@@ -3,32 +3,41 @@ Proxy local para Calculadora SOAP
 Lab 07 - Sistemas Distribuidos - UNSA 2026A
 
 Arquitectura:
-  HTML (navegador) --> este proxy (localhost:5000) --> dneonline.com (SOAP)
+  Navegador (localhost:5000) --> este proxy --> dneonline.com (SOAP)
 
 Ejecutar:
   pip install zeep flask flask-cors
   python proxy_soap.py
 
-Luego abrir calculadora_soap.html en el navegador.
+Luego abrir: http://localhost:5000
 """
 
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from zeep import Client
 from zeep.exceptions import Fault
 
-app = Flask(__name__)
-CORS(app)  # permite que el HTML en el navegador llame a este servidor
+# Sirve los archivos estáticos desde la misma carpeta del script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, static_folder=BASE_DIR)
+CORS(app)
 
 WSDL_URL = 'http://www.dneonline.com/calculator.asmx?WSDL'
-client   = None
+_client  = None
 
 def get_client():
-    global client
-    if client is None:
-        client = Client(WSDL_URL)
-    return client
+    global _client
+    if _client is None:
+        _client = Client(WSDL_URL)
+    return _client
 
+# ── Sirve el HTML en la raíz ──────────────────────────────────────
+@app.route('/')
+def index():
+    return send_from_directory(BASE_DIR, 'calculadora_soap.html')
+
+# ── API SOAP proxy ────────────────────────────────────────────────
 @app.route('/soap', methods=['POST'])
 def soap_proxy():
     data = request.get_json()
@@ -55,6 +64,7 @@ def soap_proxy():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ── Status ────────────────────────────────────────────────────────
 @app.route('/status', methods=['GET'])
 def status():
     try:
@@ -65,7 +75,7 @@ def status():
 
 if __name__ == '__main__':
     print("=" * 55)
-    print("  Proxy SOAP iniciado en http://localhost:5000")
-    print("  Abre calculadora_soap.html en tu navegador")
+    print("  Proxy SOAP activo")
+    print("  Abre en tu navegador: http://localhost:5000")
     print("=" * 55)
-    app.run(port=5000, debug=False)
+    app.run(host='127.0.0.1', port=5000, debug=False)
