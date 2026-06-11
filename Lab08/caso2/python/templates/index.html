@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Nacional de Bancos Cooperativos - 2PC</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 2.2em; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .node-card { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .node-card h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .status { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .status.online { background: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .status.offline { background: #f44336; }
+        .cuenta-item { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+        .cuenta-numero { font-family: monospace; font-size: 0.9em; color: #aaa; }
+        .cuenta-saldo { font-size: 1.3em; font-weight: bold; color: #4CAF50; }
+        .transfer-panel { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        select, input, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 16px; }
+        select, input { background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
+        button:hover { transform: translateY(-2px); }
+        .failure-buttons { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .failure-btn { background: rgba(244,67,54,0.3); border: 1px solid #f44336; }
+        .failure-btn:hover { background: rgba(244,67,54,0.5); }
+        .transactions-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .transactions-table th, .transactions-table td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .status-committed { color: #4CAF50; }
+        .status-aborted { color: #f44336; }
+        .status-preparing { color: #ff9800; }
+        .alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .alert-success { background: rgba(76,175,80,0.3); border: 1px solid #4CAF50; }
+        .alert-error { background: rgba(244,67,54,0.3); border: 1px solid #f44336; }
+        .alert-warning { background: rgba(255,152,0,0.3); border: 1px solid #ff9800; }
+        .flex { display: flex; gap: 20px; flex-wrap: wrap; }
+        .flex > * { flex: 1; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .simulating { animation: pulse 1s infinite; background: #ff9800 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Sistema Nacional de Bancos Cooperativos</h1>
+        <div class="subtitle">Protocolo Two-Phase Commit (2PC) | Transacciones Distribuidas</div>
+        
+        <div id="alert-container"></div>
+        
+        <div class="dashboard" id="dashboard">
+            <!-- Nodos se cargan dinámicamente -->
+        </div>
+        
+        <div class="transfer-panel">
+            <h3>💰 Realizar Transferencia</h3>
+            <div class="flex">
+                <div class="form-group">
+                    <label>🏛️ Cuenta Origen (Arequipa)</label>
+                    <select id="cuenta_origen">
+                        <option value="">Seleccionar cuenta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🏔️ Cuenta Destino (Cusco)</label>
+                    <select id="cuenta_destino">
+                        <option value="">Seleccionar cuenta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💰 Monto (S/)</label>
+                    <input type="number" id="monto" placeholder="Ej: 25000" step="1000" value="25000">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>⚠️ Simular Fallo (para pruebas)</label>
+                <select id="simular_fallo">
+                    <option value="none">Sin fallo - Transferencia normal</option>
+                    <option value="network">🌐 Fallo de red - Nodo Cusco no responde</option>
+                    <option value="node_crash">💥 Caída de nodo - Cusco fuera de servicio</option>
+                    <option value="timeout">⏱️ Timeout - Coordinador pierde conexión</option>
+                </select>
+            </div>
+            
+            <button id="btn-transferir" onclick="realizarTransferencia()">🔄 Ejecutar Transferencia con 2PC</button>
+            
+            <div class="failure-buttons">
+                <button class="failure-btn" onclick="simularFallo('network')">🌐 Simular Fallo de Red</button>
+                <button class="failure-btn" onclick="simularFallo('node_crash')">💥 Simular Caída de Nodo</button>
+                <button class="failure-btn" onclick="ejecutarRecuperacion()">🔄 Ejecutar Recuperación Post-Fallo</button>
+            </div>
+        </div>
+        
+        <div class="node-card">
+            <h3>📋 Últimas Transacciones (Log 2PC)</h3>
+            <div style="overflow-x: auto;">
+                <table class="transactions-table" id="transactions-table">
+                    <thead>
+                        <tr><th>ID Transacción</th><th>Estado</th><th>Origen → Destino</th><th>Monto</th><th>Fecha</th></tr>
+                    </thead>
+                    <tbody id="transactions-body">
+                        <tr><td colspan="5">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function actualizarDashboard() {
+            fetch('/api/dashboard')
+                .then(response => response.json())
+                .then(data => {
+                    renderNodes(data.nodes);
+                    renderTransactions(data.transactions);
+                    actualizarSelects(data.nodes);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        function renderNodes(nodes) {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '';
+            
+            for (const [nombre, info] of Object.entries(nodes)) {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = 'node-card';
+                const ciudadNombre = {
+                    'arequipa': '🏛️ Arequipa',
+                    'cusco': '🏔️ Cusco',
+                    'trujillo': '🌊 Trujillo'
+                }[nombre] || nombre;
+                
+                let cuentasHtml = '';
+                if (info.cuentas && info.cuentas.length > 0) {
+                    info.cuentas.forEach(cuenta => {
+                        cuentasHtml += `
+                            <div class="cuenta-item">
+                                <div class="cuenta-numero">${cuenta.numero_cuenta} - ${cuenta.titular}</div>
+                                <div class="cuenta-saldo">S/ ${cuenta.saldo.toLocaleString()}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    cuentasHtml = '<div class="cuenta-item">No hay cuentas disponibles</div>';
+                }
+                
+                nodeDiv.innerHTML = `
+                    <h3>
+                        <span class="status ${info.status === 'online' ? 'online' : 'offline'}"></span>
+                        ${ciudadNombre}
+                    </h3>
+                    ${cuentasHtml}
+                    <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+                        Total cuentas: ${info.total_cuentas || 0}<br>
+                        Saldo total: S/ ${(info.saldo_total || 0).toLocaleString()}
+                    </div>
+                `;
+                dashboard.appendChild(nodeDiv);
+            }
+        }
+        
+        function renderTransactions(transactions) {
+            const tbody = document.getElementById('transactions-body');
+            if (!transactions || transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No hay transacciones registradas</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            transactions.forEach(tx => {
+                const row = tbody.insertRow();
+                const estadoClass = {
+                    'COMMITTED': 'status-committed',
+                    'ABORTED': 'status-aborted',
+                    'PREPARING': 'status-preparing',
+                    'COMMITTING': 'status-preparing'
+                }[tx.estado] || '';
+                
+                row.innerHTML = `
+                    <td><code>${(tx.transaccion_id || '').substring(0, 13)}...</code></td>
+                    <td class="${estadoClass}">${tx.estado || 'UNKNOWN'}</td>
+                    <td>${tx.origen_nodo || '?'} → ${tx.destino_nodo || '?'}</td>
+                    <td>S/ ${(tx.monto || 0).toLocaleString()}</td>
+                    <td>${new Date(tx.timestamp_inicio).toLocaleString()}</td>
+                `;
+            });
+        }
+        
+        function actualizarSelects(nodes) {
+            const origenSelect = document.getElementById('cuenta_origen');
+            const destinoSelect = document.getElementById('cuenta_destino');
+            
+            origenSelect.innerHTML = '<option value="">Seleccionar cuenta</option>';
+            destinoSelect.innerHTML = '<option value="">Seleccionar cuenta</option>';
+            
+            if (nodes.arequipa && nodes.arequipa.cuentas) {
+                nodes.arequipa.cuentas.forEach(cuenta => {
+                    const option = document.createElement('option');
+                    option.value = cuenta.numero_cuenta;
+                    option.textContent = `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
+                    origenSelect.appendChild(option);
+                });
+            }
+            
+            if (nodes.cusco && nodes.cusco.cuentas) {
+                nodes.cusco.cuentas.forEach(cuenta => {
+                    const option = document.createElement('option');
+                    option.value = cuenta.numero_cuenta;
+                    option.textContent = `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
+                    destinoSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function mostrarAlerta(mensaje, tipo) {
+            const container = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo}`;
+            alertDiv.innerHTML = mensaje;
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+        
+        function realizarTransferencia() {
+            const cuenta_origen = document.getElementById('cuenta_origen').value;
+            const cuenta_destino = document.getElementById('cuenta_destino').value;
+            const monto = document.getElementById('monto').value;
+            const simular_fallo = document.getElementById('simular_fallo').value;
+            
+            if (!cuenta_origen || !cuenta_destino) {
+                mostrarAlerta('❌ Seleccione cuenta origen y destino', 'error');
+                return;
+            }
+            
+            if (cuenta_origen === cuenta_destino) {
+                mostrarAlerta('❌ La cuenta origen y destino no pueden ser iguales', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-transferir');
+            btn.disabled = true;
+            btn.textContent = '⏳ Procesando transacción 2PC...';
+            
+            fetch('/api/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cuenta_origen: cuenta_origen,
+                    cuenta_destino: cuenta_destino,
+                    monto: parseFloat(monto),
+                    simular_fallo: simular_fallo === 'none' ? null : simular_fallo
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta(`✅ ${data.message}`, 'success');
+                } else {
+                    mostrarAlerta(`❌ ${data.message || data.error}`, 'error');
+                }
+                actualizarDashboard();
+            })
+            .catch(error => {
+                mostrarAlerta(`❌ Error: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = '🔄 Ejecutar Transferencia con 2PC';
+            });
+        }
+        
+        function simularFallo(tipo) {
+            fetch('/api/failure/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: tipo, node: 'cusco' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                mostrarAlerta(`⚠️ Simulación activada: ${tipo}. Ahora realice una transferencia.`, 'warning');
+                document.getElementById('simular_fallo').value = tipo;
+            });
+        }
+        
+        function ejecutarRecuperacion() {
+            fetch('/api/recovery/execute', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    mostrarAlerta(`🔄 Recuperación completada. ${data.recovered_count} transacciones recuperadas.`, 'success');
+                    actualizarDashboard();
+                })
+                .catch(error => {
+                    mostrarAlerta(`❌ Error en recuperación: ${error.message}`, 'error');
+                });
+        }
+        
+        // Actualizar dashboard cada 3 segundos
+        actualizarDashboard();
+        setInterval(actualizarDashboard, 3000);
+    </script>
+</body>
+</html>
