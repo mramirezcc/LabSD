@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # Nodo Arequipa (Origen)
+  postgres_arequipa:
+    image: postgres:16
+    container_name: banco_arequipa
+    environment:
+      POSTGRES_DB: banco_arequipa
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./scripts_sql/init_arequipa.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_arequipa:/var/lib/postgresql/data
+    networks:
+      - banco_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d banco_arequipa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nodo Cusco (Destino)
+  postgres_cusco:
+    image: postgres:16
+    container_name: banco_cusco
+    environment:
+      POSTGRES_DB: banco_cusco
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./scripts_sql/init_cusco.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_cusco:/var/lib/postgresql/data
+    networks:
+      - banco_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d banco_cusco"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nodo Trujillo (Testigo)
+  postgres_trujillo:
+    image: postgres:16
+    container_name: banco_trujillo
+    environment:
+      POSTGRES_DB: banco_trujillo
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./scripts_sql/init_trujillo.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_trujillo:/var/lib/postgresql/data
+    networks:
+      - banco_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d banco_trujillo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Base de datos de Logs (Recuperación)
+  postgres_logs:
+    image: postgres:16
+    container_name: banco_logs
+    environment:
+      POSTGRES_DB: banco_logs
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./scripts_sql/init_logs.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata_logs:/var/lib/postgresql/data
+    networks:
+      - banco_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d banco_logs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Coordinador Python (2PC)
+  coordinator:
+    build: ./python
+    container_name: coordinator_app
+    depends_on:
+      postgres_arequipa:
+        condition: service_healthy
+      postgres_cusco:
+        condition: service_healthy
+      postgres_trujillo:
+        condition: service_healthy
+      postgres_logs:
+        condition: service_healthy
+    environment:
+      - DB_AREQUIPA_HOST=postgres_arequipa
+      - DB_CUSCO_HOST=postgres_cusco
+      - DB_TRUJILLO_HOST=postgres_trujillo
+      - DB_LOGS_HOST=postgres_logs
+      - DB_AREQUIPA_PORT=5432
+      - DB_CUSCO_PORT=5432
+      - DB_TRUJILLO_PORT=5432
+      - DB_LOGS_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+    ports:
+      - "5000:5000"
+    networks:
+      - banco_network
+    stdin_open: true
+    tty: true
+
+networks:
+  banco_network:
+    driver: bridge
+
+volumes:
+  pgdata_arequipa:
+  pgdata_cusco:
+  pgdata_trujillo:
+  pgdata_logs:
