@@ -194,28 +194,38 @@
         function actualizarSelects(nodes) {
             const origenSelect = document.getElementById('cuenta_origen');
             const destinoSelect = document.getElementById('cuenta_destino');
-            
+
+            // Guardar selección actual
+            const origenActual = origenSelect.value;
+            const destinoActual = destinoSelect.value;
+
             origenSelect.innerHTML = '<option value="">Seleccionar cuenta</option>';
             destinoSelect.innerHTML = '<option value="">Seleccionar cuenta</option>';
-            
+
             if (nodes.arequipa && nodes.arequipa.cuentas) {
                 nodes.arequipa.cuentas.forEach(cuenta => {
                     const option = document.createElement('option');
                     option.value = cuenta.numero_cuenta;
-                    option.textContent = `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
+                    option.textContent =
+                        `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
                     origenSelect.appendChild(option);
                 });
             }
-            
+
             if (nodes.cusco && nodes.cusco.cuentas) {
                 nodes.cusco.cuentas.forEach(cuenta => {
                     const option = document.createElement('option');
                     option.value = cuenta.numero_cuenta;
-                    option.textContent = `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
+                    option.textContent =
+                        `${cuenta.numero_cuenta} - ${cuenta.titular} (S/ ${cuenta.saldo.toLocaleString()})`;
                     destinoSelect.appendChild(option);
                 });
             }
-        }
+
+            // Restaurar selección
+            origenSelect.value = origenActual;
+            destinoSelect.value = destinoActual;
+}
         
         function mostrarAlerta(mensaje, tipo) {
             const container = document.getElementById('alert-container');
