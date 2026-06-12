@@ -12,35 +12,35 @@ app.secret_key = 'sistema_bancario_cooperativo_2026'
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuración de conexiones (igual que en coordinator.py)
+# Configuración de conexiones (coinciden con las del docker-compose)
 DB_CONFIGS = {
     'arequipa': {
-        'host': os.getenv('DB_AR EQUIPA_HOST', 'localhost'),
-        'port': 5433,
+        'host': os.getenv('DB_AREQUIPA_HOST', 'localhost'),
+        'port': int(os.getenv('DB_AREQUIPA_PORT', 5433)),
         'database': 'banco_arequipa',
-        'user': 'admin',
-        'password': 'admin123'
+        'user': os.getenv('DB_USER', 'admin'),
+        'password': os.getenv('DB_PASSWORD', 'admin123')
     },
     'cusco': {
         'host': os.getenv('DB_CUSCO_HOST', 'localhost'),
-        'port': 5434,
+        'port': int(os.getenv('DB_CUSCO_PORT', 5434)),
         'database': 'banco_cusco',
-        'user': 'admin',
-        'password': 'admin123'
+        'user': os.getenv('DB_USER', 'admin'),
+        'password': os.getenv('DB_PASSWORD', 'admin123')
     },
     'trujillo': {
         'host': os.getenv('DB_TRUJILLO_HOST', 'localhost'),
-        'port': 5435,
+        'port': int(os.getenv('DB_TRUJILLO_PORT', 5435)),
         'database': 'banco_trujillo',
-        'user': 'admin',
-        'password': 'admin123'
+        'user': os.getenv('DB_USER', 'admin'),
+        'password': os.getenv('DB_PASSWORD', 'admin123')
     },
     'logs': {
         'host': os.getenv('DB_LOGS_HOST', 'localhost'),
-        'port': 5436,
+        'port': int(os.getenv('DB_LOGS_PORT', 5436)),
         'database': 'banco_logs',
-        'user': 'admin',
-        'password': 'admin123'
+        'user': os.getenv('DB_USER', 'admin'),
+        'password': os.getenv('DB_PASSWORD', 'admin123')
     }
 }
 
@@ -132,10 +132,11 @@ def transfer():
         logger.warning(f"⚠️ SIMULACIÓN ACTIVADA: {simular_fallo}")
     
     try:
-        # Ejecutar transacción 2PC
+        # Ejecutar transacción 2PC (Arequipa origen, Cusco destino, Trujillo testigo)
         success, message, tx_id = coordinator.execute_transaction_with_failure(
             DB_CONFIGS['arequipa'],
             DB_CONFIGS['cusco'],
+            DB_CONFIGS['trujillo'],
             cuenta_origen,
             cuenta_destino,
             monto,

@@ -252,154 +252,191 @@ class TwoPhaseCommit:
             logger.error(f"Error en abort para {nodo_nombre}: {e}")
             return False, str(e)
 
-    def execute_transaction(self, origen_config: Dict, destino_config: Dict,
-                           cuenta_origen: str, cuenta_destino: str,
-                           monto: float, timeout_seconds: int = 10) -> Tuple[bool, str]:
+    def _preparar_testigo(self, conn, transaccion_id: str, monto: float) -> Tuple[bool, str]:
         """
-        Ejecuta una transacción distribuida completa usando 2PC
+        Fase PREPARE para el nodo testigo (Trujillo).
 
-        Args:
-            origen_config: Configuración DB origen (Arequipa)
-            destino_config: Configuración DB destino (Cusco)
-            cuenta_origen: Número de cuenta origen
-            cuenta_destino: Número de cuenta destino
-            monto: Monto a transferir
-            timeout_seconds: Timeout para esperar respuestas
+        Trujillo no mueve fondos: solo registra en su log distribuido
+        que la transacción está en curso, garantizando trazabilidad.
 
         Returns:
             Tuple[bool, str]: (éxito, mensaje)
         """
-        transaccion_id = str(uuid.uuid4())
-        logger.info(f"=== INICIANDO TRANSACCIÓN 2PC: {transaccion_id} ===")
-        logger.info(f"Transferencia: {cuenta_origen} (Arequipa) → {cuenta_destino} (Cusco)")
-        logger.info(f"Monto: S/ {monto}")
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO transacciones_log (transaccion_id, tipo, monto, estado)
+                VALUES (%s, 'REGISTRO_TESTIGO', %s, 'PREPARADO')
+            """, (transaccion_id, monto))
+            conn.commit()
+            logger.info("Participante Trujillo (testigo) preparado: registro en log distribuido")
+            return True, "OK"
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error preparando participante Trujillo: {e}")
+            return False, str(e)
 
-        # Registrar inicio de transacción
+    def _commit_testigo(self, conn, transaccion_id: str) -> Tuple[bool, str]:
+        """
+        Fase COMMIT para el nodo testigo (Trujillo): consolida el registro del log.
+        """
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE transacciones_log
+                SET estado = 'COMMITTED'
+                WHERE transaccion_id = %s AND tipo = 'REGISTRO_TESTIGO'
+            """, (transaccion_id,))
+            conn.commit()
+            logger.info("Commit exitoso en Trujillo: log distribuido consolidado")
+            return True, "OK"
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Error en commit para Trujillo: {e}")
+            return False, str(e)
+
+    def execute_transaction_with_failure(self, origen_config: Dict, destino_config: Dict,
+                                          testigo_config: Dict, cuenta_origen: str,
+                                          cuenta_destino: str, monto: float,
+                                          failure_mode: Optional[Dict] = None,
+                                          timeout_seconds: int = 5) -> Tuple[bool, str, str]:
+        """
+        Ejecuta la transacción distribuida (Arequipa -> Cusco) usando 2PC,
+        con Trujillo participando como nodo testigo del log distribuido.
+
+        Permite simular fallos sobre el nodo Cusco (destino):
+            - 'network'    -> falla de red, Cusco no recibe/responde el PREPARE
+            - 'node_crash' -> Cusco está caído, la conexión es rechazada
+            - 'timeout'    -> Cusco no responde dentro del tiempo límite del coordinador
+
+        Returns:
+            Tuple[bool, str, str]: (éxito, mensaje, transaccion_id)
+        """
+        transaccion_id = str(uuid.uuid4())
+        fallo_tipo = failure_mode.get('type') if failure_mode else None
+
+        logger.info(f"=== INICIANDO TRANSACCIÓN 2PC: {transaccion_id} ===")
+        logger.info(f"Transferencia: {cuenta_origen} (Arequipa) -> {cuenta_destino} (Cusco)")
+        logger.info(f"Monto: S/ {monto} | Testigo: Trujillo")
+        if fallo_tipo:
+            logger.warning(f"⚠️ Simulación de fallo activa sobre Cusco: {fallo_tipo}")
+
         self._registrar_transaccion(transaccion_id, 'Arequipa', 'Cusco',
                                     cuenta_origen, cuenta_destino, monto)
 
-        # Conectar a participantes
         origen_conn = None
         destino_conn = None
+        testigo_conn = None
 
         try:
             origen_conn = psycopg2.connect(**origen_config)
-            destino_conn = psycopg2.connect(**destino_config)
+            testigo_conn = psycopg2.connect(**testigo_config)
 
             # ========== FASE 1: PREPARE ==========
             logger.info("")
-            logger.info("╔══════════════════════════════════════════════════════════════╗")
-            logger.info("║                    FASE 1: PREPARE                           ║")
-            logger.info("╚══════════════════════════════════════════════════════════════╝")
+            logger.info("=== FASE 1: PREPARE ===")
             self._actualizar_estado(transaccion_id, 'PREPARING', 'PREPARE')
 
-            # Preparar nodo origen (Arequipa)
-            logger.info("→ Enviando PREPARE a nodo Arequipa...")
+            logger.info("-> PREPARE a nodo Arequipa (débito)")
             origen_preparado, origen_msg = self._preparar_participante(
                 origen_conn, transaccion_id, cuenta_origen, monto, True, 'Arequipa'
             )
             self._registrar_voto(transaccion_id, 'Arequipa', 'YES' if origen_preparado else 'NO')
-            logger.info(f"  Respuesta Arequipa: {'YES' if origen_preparado else 'NO'} - {origen_msg}")
+            logger.info(f"   Respuesta Arequipa: {'YES' if origen_preparado else 'NO'} - {origen_msg}")
 
-            # Preparar nodo destino (Cusco) - con timeout
-            logger.info("→ Enviando PREPARE a nodo Cusco...")
+            logger.info("-> PREPARE a nodo Trujillo (testigo, registrar log)")
+            testigo_preparado, testigo_msg = self._preparar_testigo(testigo_conn, transaccion_id, monto)
+            self._registrar_voto(transaccion_id, 'Trujillo', 'YES' if testigo_preparado else 'NO')
+            logger.info(f"   Respuesta Trujillo: {'YES' if testigo_preparado else 'NO'} - {testigo_msg}")
+
+            logger.info("-> PREPARE a nodo Cusco (crédito)")
             destino_preparado = False
-            destino_msg = "Timeout"
+            destino_msg = ""
 
-            import threading
-
-            def prepare_destino():
-                nonlocal destino_preparado, destino_msg
+            if fallo_tipo == 'node_crash':
+                destino_msg = "Nodo Cusco caído: conexión rechazada"
+                logger.warning(f"   ⚠️ CAÍDA DE NODO: {destino_msg}")
+            elif fallo_tipo == 'network':
+                destino_msg = "Falla de red: el mensaje PREPARE no llegó a Cusco"
+                logger.warning(f"   ⚠️ FALLA DE RED: {destino_msg}")
+            elif fallo_tipo == 'timeout':
+                destino_msg = f"Timeout: Cusco no respondió en {timeout_seconds}s"
+                logger.warning(f"   ⚠️ TIMEOUT: {destino_msg}")
+            else:
                 try:
-                    resultado, msg = self._preparar_participante(
+                    destino_conn = psycopg2.connect(**destino_config)
+                    destino_preparado, destino_msg = self._preparar_participante(
                         destino_conn, transaccion_id, cuenta_destino, monto, False, 'Cusco'
                     )
-                    destino_preparado = resultado
-                    destino_msg = msg
                 except Exception as e:
                     destino_preparado = False
                     destino_msg = str(e)
 
-            thread = threading.Thread(target=prepare_destino)
-            thread.start()
-            thread.join(timeout=timeout_seconds)
-
-            if thread.is_alive():
-                logger.warning(f"  ⚠️ TIMEOUT: Cusco no respondió en {timeout_seconds}s")
-                destino_preparado = False
-                destino_msg = f"Timeout después de {timeout_seconds} segundos"
-            else:
-                logger.info(f"  Respuesta Cusco: {'YES' if destino_preparado else 'NO'} - {destino_msg}")
-
             self._registrar_voto(transaccion_id, 'Cusco', 'YES' if destino_preparado else 'NO')
+            logger.info(f"   Respuesta Cusco: {'YES' if destino_preparado else 'NO'} - {destino_msg}")
 
-            # Evaluar votos (solo Arequipa y Cusco, Trujillo es testigo pasivo)
-            all_prepared = origen_preparado and destino_preparado
+            all_prepared = origen_preparado and destino_preparado and testigo_preparado
 
-            # ========== FASE 2: COMMIT / ABORT ==========
+            # ========== FASE 2: COMMIT / ROLLBACK ==========
             logger.info("")
-            logger.info("╔══════════════════════════════════════════════════════════════╗")
-
             if all_prepared:
-                logger.info("║                    FASE 2: COMMIT                          ║")
-                logger.info("╚══════════════════════════════════════════════════════════════╝")
+                logger.info("=== FASE 2: COMMIT (todos votaron YES) ===")
                 self._actualizar_estado(transaccion_id, 'COMMITTING', 'COMMIT')
 
-                # Commit en origen
-                logger.info("→ Enviando COMMIT a nodo Arequipa...")
-                commit_origen, msg_origen = self._commit_participante(
+                logger.info("-> COMMIT a nodo Arequipa")
+                commit_origen, _ = self._commit_participante(
                     origen_conn, transaccion_id, cuenta_origen, cuenta_destino, monto, True, 'Arequipa'
                 )
-
-                # Commit en destino
-                logger.info("→ Enviando COMMIT a nodo Cusco...")
-                commit_destino, msg_destino = self._commit_participante(
+                logger.info("-> COMMIT a nodo Cusco")
+                commit_destino, _ = self._commit_participante(
                     destino_conn, transaccion_id, cuenta_origen, cuenta_destino, monto, False, 'Cusco'
                 )
+                logger.info("-> COMMIT a nodo Trujillo (consolida log)")
+                commit_testigo, _ = self._commit_testigo(testigo_conn, transaccion_id)
 
-                if commit_origen and commit_destino:
+                if commit_origen and commit_destino and commit_testigo:
                     self._actualizar_estado(transaccion_id, 'COMMITTED', 'DONE')
-                    logger.info("")
-                    logger.info("✅ ✅ ✅ TRANSACCIÓN EXITOSA ✅ ✅ ✅")
-                    logger.info(f"Transferencia de S/ {monto} completada")
-                    logger.info(f"ID Transacción: {transaccion_id}")
-                    return True, f"Transferencia de S/ {monto} completada exitosamente"
+                    logger.info("✅ TRANSACCIÓN EXITOSA - TX confirmada en los 3 nodos")
+                    return True, f"Transferencia de S/ {monto:,.2f} completada exitosamente (COMMIT en Arequipa, Cusco y Trujillo)", transaccion_id
                 else:
-                    logger.error("❌ Fallo en commit, ejecutando rollback parcial")
+                    logger.error("❌ Fallo durante COMMIT, ejecutando rollback parcial")
                     self._abort_participante(origen_conn, transaccion_id, 'Arequipa')
                     self._abort_participante(destino_conn, transaccion_id, 'Cusco')
-                    self._actualizar_estado(transaccion_id, 'ABORTED', 'FAILED',
-                                           "Fallo durante commit")
-                    return False, "Error durante confirmación de transacción"
+                    self._abort_participante(testigo_conn, transaccion_id, 'Trujillo')
+                    self._actualizar_estado(transaccion_id, 'ABORTED', 'FAILED', "Fallo durante commit")
+                    return False, "Error durante confirmación de transacción", transaccion_id
             else:
-                logger.info("║                    FASE 2: ABORT (ROLLBACK)                ║")
-                logger.info("╚══════════════════════════════════════════════════════════════╝")
+                logger.info("=== FASE 2: ROLLBACK (al menos un voto NO) ===")
                 self._actualizar_estado(transaccion_id, 'ABORTING', 'ABORT')
 
                 if origen_preparado:
-                    logger.info("→ Enviando ABORT a nodo Arequipa...")
+                    logger.info("-> ROLLBACK a nodo Arequipa")
                     self._abort_participante(origen_conn, transaccion_id, 'Arequipa')
-                if destino_preparado:
-                    logger.info("→ Enviando ABORT a nodo Cusco...")
+                if destino_preparado and destino_conn:
+                    logger.info("-> ROLLBACK a nodo Cusco")
                     self._abort_participante(destino_conn, transaccion_id, 'Cusco')
+                if testigo_preparado:
+                    logger.info("-> ROLLBACK a nodo Trujillo")
+                    self._abort_participante(testigo_conn, transaccion_id, 'Trujillo')
 
-                self._actualizar_estado(transaccion_id, 'ABORTED', 'DONE',
-                                       f"Voto negativo: Origen={origen_preparado}, Destino={destino_preparado}")
-                logger.info("")
-                logger.info("❌ ❌ ❌ TRANSACCIÓN ABORTADA ❌ ❌ ❌")
-                logger.info(f"Motivo: {origen_msg if not origen_preparado else destino_msg}")
-                return False, f"Transferencia abortada: {origen_msg if not origen_preparado else destino_msg}"
+                motivo = destino_msg if not destino_preparado else (
+                    origen_msg if not origen_preparado else testigo_msg)
+                self._actualizar_estado(transaccion_id, 'ABORTED', 'DONE', f"Voto negativo: {motivo}")
+                logger.info(f"❌ TRANSACCIÓN ABORTADA (ROLLBACK). Motivo: {motivo}")
+                return False, f"Transferencia abortada (ROLLBACK): {motivo}", transaccion_id
 
         except Exception as e:
             logger.error(f"Error durante transacción 2PC: {e}")
             self._actualizar_estado(transaccion_id, 'ABORTED', 'ERROR', str(e))
-            return False, f"Error en transacción: {str(e)}"
+            return False, f"Error en transacción: {str(e)}", transaccion_id
 
         finally:
             if origen_conn:
                 origen_conn.close()
             if destino_conn:
                 destino_conn.close()
+            if testigo_conn:
+                testigo_conn.close()
 
     def get_transaction_status(self, transaccion_id: str) -> Optional[Dict]:
         """Obtiene el estado de una transacción desde los logs"""
