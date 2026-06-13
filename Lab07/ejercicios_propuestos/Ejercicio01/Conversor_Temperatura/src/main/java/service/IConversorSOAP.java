@@ -8,8 +8,8 @@ import javax.jws.WebService;
 public interface IConversorSOAP {
     
     @WebMethod
-    double cToF(@WebParam(name = "c") double c); // <-- Agregar @WebParam aquí
+    double cToF(@WebParam(name = "c") double c); 
     
     @WebMethod
-    double fToC(@WebParam(name = "f") double f); // <-- Agregar @WebParam aquí
+    double fToC(@WebParam(name = "f") double f);
 }

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "CP-01",
+    "objetivo": "Registro correcto de pedido",
+    "entrada": "Cliente: Supermercado El Sol, Producto: P001 x5",
+    "esperado": "Pedido REGISTRADO con ID, total > 0",
+    "obtenido": "Estado: REGISTRADO, Total: S/ 22.5, ID: PED-0001",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:19.321727"
+  },
+  {
+    "id": "CP-02",
+    "objetivo": "Pedido con inventario insuficiente",
+    "entrada": "Producto P007 x9999 (stock real ~45)",
+    "esperado": "Error por stock insuficiente (400/409)",
+    "obtenido": "Status: 400, Resp: {\"detalles\":[\"Producto #1: cantidad debe estar entre 1 y 500\"],\"error\":\"Validacion fallida\"}\n",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:19.836881"
+  },
+  {
+    "id": "CP-03",
+    "objetivo": "Cancelacion de pedido",
+    "entrada": "Cancelar pedido PED-0002",
+    "esperado": "Pedido en estado CANCELADO",
+    "obtenido": "Estado: CANCELADO",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:20.451232"
+  },
+  {
+    "id": "CP-04",
+    "objetivo": "Aplicacion de promocion DESC10 (10% desc)",
+    "entrada": "P001 x10 + promo DESC10, Subtotal S/ 45.0",
+    "esperado": "Total < S/ 45.0, descuento > 0",
+    "obtenido": "Total: S/ 40.5, Desc: S/ 4.5, Msg: Descuento 10% aplicado exitosamente",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:21.011786"
+  },
+  {
+    "id": "CP-05",
+    "objetivo": "Generacion automatica de factura",
+    "entrada": "Crear pedido con P005 x3",
+    "esperado": "factura_id asignado automaticamente",
+    "obtenido": "Factura ID: FAC-FDDD3C87",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:27.819009"
+  },
+  {
+    "id": "CP-06",
+    "objetivo": "Envio de notificacion por email",
+    "entrada": "Pedido para Bodega La Esquina",
+    "esperado": "notificacion_enviada = true",
+    "obtenido": "Notificacion: Enviada",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:36.828547"
+  },
+  {
+    "id": "CP-07",
+    "objetivo": "Consulta de pedido por ID existente",
+    "entrada": "GET /pedido/PED-0001",
+    "esperado": "200 con datos del pedido",
+    "obtenido": "ID: PED-0001, Estado: REGISTRADO",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:37.353709"
+  },
+  {
+    "id": "CP-08",
+    "objetivo": "Listado completo de inventario",
+    "entrada": "GET /inventario",
+    "esperado": "Lista con 10 productos",
+    "obtenido": "Total productos: 10",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:37.871467"
+  },
+  {
+    "id": "CP-09",
+    "objetivo": "Consulta de producto inexistente",
+    "entrada": "GET /inventario/P999",
+    "esperado": "404 Producto no encontrado",
+    "obtenido": "Status: 404, Resp: {\"error\":\"Producto no encontrado\"}\n",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:38.395409"
+  },
+  {
+    "id": "CP-10",
+    "objetivo": "Listado de facturas emitidas",
+    "entrada": "GET /facturas",
+    "esperado": "Lista de facturas (posibles duplicadas)",
+    "obtenido": "Total facturas: 6, Duplicadas: 1",
+    "resultado": "PASO",
+    "fecha": "2026-06-13T11:24:38.910191"
+  }
+]

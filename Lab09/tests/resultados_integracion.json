@@ -1,0 +1,74 @@
+[
+  {
+    "flujo": "Pedido-Inventario",
+    "prueba": "Verificar reduccion de stock",
+    "esperado": "Reduccion de 3 unidades",
+    "obtenido": "Reduccion: 15 (inesperada)",
+    "resultado": "FALLO",
+    "fallo_descripcion": "Reduccion fuera del rango esperado",
+    "fecha": "2026-06-13T11:25:26.951985"
+  },
+  {
+    "flujo": "Pedido-Inventario",
+    "prueba": "Manejo de desconexion",
+    "esperado": "El sistema debe reportar error sin caerse",
+    "obtenido": "Se recomienda implementar Circuit Breaker con timeout y retry. Actualmente el pedido falla con error 503 si inventario no responde.",
+    "resultado": "PASO",
+    "fallo_descripcion": "MECANISMO RECOMENDADO: Circuit Breaker + Retry con backoff exponencial + Cache de inventario local.",
+    "fecha": "2026-06-13T11:25:26.952093"
+  },
+  {
+    "flujo": "Pedido-Facturacion",
+    "prueba": "Generacion y consulta de factura",
+    "esperado": "Factura vinculada al pedido",
+    "obtenido": "Factura FAC-5A603933 -> Pedido PED-0007",
+    "resultado": "PASO",
+    "fallo_descripcion": "",
+    "fecha": "2026-06-13T11:25:28.075665"
+  },
+  {
+    "flujo": "Pedido-Facturacion",
+    "prueba": "Deteccion de facturas duplicadas",
+    "esperado": "Identificacion de duplicados",
+    "obtenido": "1 duplicadas encontradas",
+    "resultado": "PASO",
+    "fallo_descripcion": "MECANISMO RECOMENDADO: Idempotencia con request-id unico + validacion de unicidad en BD.",
+    "fecha": "2026-06-13T11:25:28.087602"
+  },
+  {
+    "flujo": "Pedido-Facturacion",
+    "prueba": "Mecanismo de recuperacion",
+    "esperado": "Manejo de fallos en facturacion",
+    "obtenido": "Recomendacion: Cola de mensajes (RabbitMQ/Kafka) para garantizar entrega. Patron Outbox para consistencia eventual entre Pedido y Factura.",
+    "resultado": "PASO",
+    "fallo_descripcion": "",
+    "fecha": "2026-06-13T11:25:28.087659"
+  },
+  {
+    "flujo": "Pedido-Transporte",
+    "prueba": "Asignacion de transporte al pedido",
+    "esperado": "Transporte vinculado al pedido. ",
+    "obtenido": "Transporte TRN-24EBF946, Estado: ASIGNADO, Conductor: Ana T.",
+    "resultado": "PASO",
+    "fallo_descripcion": "",
+    "fecha": "2026-06-13T11:25:34.554035"
+  },
+  {
+    "flujo": "Pedido-Transporte",
+    "prueba": "Mecanismo de recuperacion",
+    "esperado": "Manejo de fallos en transporte",
+    "obtenido": "Recomendacion: Patron Saga para compensacion. Si transporte falla, liberar inventario y cancelar factura. Timeout de 5s con 3 reintentos.",
+    "resultado": "PASO",
+    "fallo_descripcion": "",
+    "fecha": "2026-06-13T11:25:34.554075"
+  },
+  {
+    "flujo": "Concurrencia",
+    "prueba": "10 pedidos simultaneos",
+    "esperado": "Al menos 8 de 10 exitosos",
+    "obtenido": "10/10 exitosos, 0 errores",
+    "resultado": "PASO",
+    "fallo_descripcion": "RECOMENDACION: Implementar control de concurrencia con locks distribuidos (Redis) y/o colas de mensajes para serializar operaciones sobre inventario compartido.",
+    "fecha": "2026-06-13T11:25:45.470889"
+  }
+]

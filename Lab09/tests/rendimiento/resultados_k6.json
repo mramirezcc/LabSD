@@ -1,0 +1,33 @@
+{
+  "fecha": "2026-06-13T16:51:10.377Z",
+  "configuracion": {
+    "usuarios_virtuales": 100,
+    "duracion": "5m (stages)",
+    "escenario": "LogiFresh S.A. - Prueba de Carga"
+  },
+  "metricas_http": {
+    "total_requests": 5181,
+    "requests_fallidos": 5181,
+    "tasa_fallos": 0,
+    "duracion_promedio": "1821.76 ms",
+    "duracion_maxima": "19272.03 ms",
+    "duracion_p90": "7942.85 ms",
+    "duracion_p95": "10475.57 ms",
+    "duracion_p99": "15590.94 ms",
+    "throughput": "18.30 req/s"
+  },
+  "metricas_pedidos": {
+    "pedidos_exitosos": 3015,
+    "pedidos_fallidos": 0
+  },
+  "metricas_tiempo_pedido": {
+    "promedio": "3121.45 ms",
+    "maximo": "19272.00 ms",
+    "p95": "11771.60 ms"
+  },
+  "interpretacion": {
+    "tiempo_promedio": "ACEPTABLE (< 3s)",
+    "tasa_errores": "ACEPTABLE (< 5%)",
+    "throughput": "MODERADO - Sistema funcional bajo carga"
+  }
+}

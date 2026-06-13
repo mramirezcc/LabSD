@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>INT-0005 - Registro de Repuestos Utilizados</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: #fcfcfc;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 680px;
+            padding: 32px;
+            border: 1px solid #eaeaea;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-crear {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .header-meta {
+            font-size: 12px;
+            color: #999999;
+            font-weight: 500;
+        }
+
+        .info-banner {
+            background-color: #e8f4fd;
+            border-left: 4px solid #2196f3;
+            padding: 14px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #1d6fa5;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #8c8c8c;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        label .required {
+            color: #d32f2f;
+            margin-left: 2px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: #f2f2f0;
+            border: 1px solid #e2e2e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2c2c2c;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #b5b5b5;
+            background-color: #efefed;
+        }
+
+        .readonly-field {
+            background-color: #f8f8f6;
+            border-color: #eaeaea;
+            color: #555555;
+            cursor: not-allowed;
+        }
+
+        .badge-estado {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .btn-agregar-container {
+            margin: 24px 0;
+        }
+
+        .btn-secondary-action {
+            width: 100%;
+            background-color: #e5e5e3;
+            color: #2c2c2c;
+            border: 1px solid #d4d4d2;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary-action:hover {
+            background-color: #dadada;
+        }
+
+        .table-container {
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            background-color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f8f6;
+            color: #777777;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eaeaea;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 16px;
+            color: #333333;
+            border-bottom: 1px solid #f4f4f2;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tbl-btn-eliminar {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .tbl-btn-eliminar:hover {
+            text-decoration: underline;
+        }
+
+        .error-banner {
+            background-color: #fdecea;
+            border-left: 4px solid #f44336;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #c62828;
+            display: none;
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .btn-outline {
+            background-color: #ffffff;
+            color: #444444;
+            border: 1px solid #cccccc;
+            padding: 12px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: #f5f5f5;
+            border-color: #b5b5b5;
+        }
+
+        .btn-primary-action {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            padding: 12px 32px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary-action:hover {
+            background-color: #333333;
+        }
+
+        .footer-meta {
+            font-size: 10px;
+            color: #aaaaaa;
+            text-align: center;
+            margin-top: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- Encabezado Principal -->
+    <div class="card-header">
+        <div class="header-title-container">
+            <span class="badge-crear">Crear</span>
+            <h1 class="header-title">Adición de Repuestos a Orden</h1>
+        </div>
+        <div class="header-meta">ILA-0005 · INT-0005</div>
+    </div>
+
+    <!-- Banner Informativo de Regla de Negocio -->
+    <div class="info-banner">
+        ℹ️ <strong>Regla de Negocio:</strong> Solo se pueden registrar repuestos en órdenes con estado <strong>Recepcionado</strong> o <strong>En proceso</strong>. El sistema valida el inventario en tiempo real.
+    </div>
+
+    <!-- Selector de Orden de Servicio -->
+    <div class="form-group">
+        <label for="orden-select">Seleccionar Orden de Servicio</label>
+        <select id="orden-select">
+            <option value="1">ORD-2026-7659 · Carlos Mamani Quispe (Honda Wave 110)</option>
+            <option value="2">ORD-2026-7660 · Juan Carlos Balta (Yamaha FZ25)</option>
+        </select>
+    </div>
+
+    <!-- Bloque de Datos del Cliente (Autocompletado síncrono) -->
+    <div class="form-row">
+        <div class="form-group">
+            <label>Nombre y Apellidos del Cliente</label>
+            <input type="text" class="readonly-field" value="Carlos Mamani Quispe" readonly>
+        </div>
+        <div class="form-group">
+            <label>DNI / Teléfono</label>
+            <input type="text" class="readonly-field" value="45781293  ·  +51 941 382 017" readonly>
+        </div>
+    </div>
+
+    <!-- Bloque de Datos del Vehículo y Estado -->
+    <div class="form-row">
+        <div class="form-group">
+            <label>Vehículo (Placa - Modelo - Color)</label>
+            <input type="text" class="readonly-field" value="C3G-412  -  Honda Wave 110  -  Rojo" readonly>
+        </div>
+        <div class="form-group">
+            <label>Estado Actual de la Orden</label>
+            <div>
+                <span class="badge-estado">RECEPCIONADO</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selección de Repuestos e Ingreso de Cantidad -->
+    <div class="form-row" style="margin-top: 12px;">
+        <div class="form-group" style="flex: 2;">
+            <label for="repuesto-select">Repuesto (Código o Nombre) <span class="required">*</span></label>
+            <select id="repuesto-select">
+                <option value="r1">REP-0021 - Pastillas de Freno Delanteras (Stock: 15)</option>
+                <option value="r2">REP-0008 - Aceite Semi-Sintético 4T Motul (Stock: 24)</option>
+                <option value="r3">REP-0112 - Bujía NGK Standard (Stock: 8)</option>
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label for="cantidad-input">Cantidad <span class="required">*</span></label>
+            <input type="number" id="cantidad-input" value="1" min="1">
+        </div>
+    </div>
+
+    <!-- Banner de Error dinámico -->
+    <div class="error-banner" id="error-msg">
+        ⚠️ <strong>Error:</strong> La cantidad solicitada supera el stock físico disponible en el inventario.
+    </div>
+
+    <!-- Botón Agregar Local -->
+    <div class="btn-agregar-container">
+        <button type="button" class="btn-secondary-action">[BTN-01] Agregar Repuesto a la Lista</button>
+    </div>
+
+    <!-- Tabla de Detalle Transitorio -->
+    <label>Lista de Repuestos a Cargar [TBL-01]</label>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th style="width: 80px;">Cantidad</th>
+                    <th style="width: 100px; text-align: right;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>REP-0021</strong></td>
+                    <td>Pastillas de Freno Delanteras</td>
+                    <td>1</td>
+                    <td style="text-align: right;"><button class="tbl-btn-eliminar">[ Eliminar ]</button></td>
+                </tr>
+                <tr>
+                    <td><strong>REP-0008</strong></td>
+                    <td>Aceite Semi-Sintético 4T Motul</td>
+                    <td>1</td>
+                    <td style="text-align: right;"><button class="tbl-btn-eliminar">[ Eliminar ]</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botonera de Control Inferior de tres opciones -->
+    <div class="footer-actions">
+        <button type="button" class="btn-outline">Nueva Orden (BTN-04)</button>
+        <button type="button" class="btn-primary-action">Guardar Repuestos (BTN-03)</button>
+        <button type="button" class="btn-outline">Cancelar (BTN-05)</button>
+    </div>
+
+    <!-- Metadata de pie de página -->
+    <div class="footer-meta">
+        Artefactos Asociados: INT-0005  ·  Precondición: Base de Datos Inicializada y Operativa
+    </div>
+</div>
+
+</body>
+</html>

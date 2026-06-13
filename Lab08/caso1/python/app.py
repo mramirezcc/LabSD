@@ -71,9 +71,9 @@ def transferir():
         bitacora.append(f"[Arequipa] Solicitud de descuento aprobada. Restando {cantidad} unidades...")
         cur_aqp.execute("UPDATE inventario SET stock = stock - %s WHERE producto = 'Paracetamol';", (cantidad,))
 
-        # Paso C: Simulación del fallo (Ejercicio 2)
+        # Paso C: Simulación del fallo 
         if simular_fallo:
-            bitacora.append("⚠️ [Simulación] Cortando comunicación de red con el Nodo Lima...")
+            bitacora.append("[Simulación] Cortando comunicación de red con el Nodo Lima...")
             raise psycopg2.OperationalError("Error de comunicación: El nodo de destino no responde.")
 
         # Paso D: Incrementar Destino
